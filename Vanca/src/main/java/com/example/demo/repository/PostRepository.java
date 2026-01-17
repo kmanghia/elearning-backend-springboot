@@ -1,8 +1,8 @@
-package com.example.demo.repository;
-
 import com.example.demo.model.Post;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
@@ -21,4 +21,9 @@ public interface PostRepository extends JpaRepository<Post, Long> {
 	
 	@Query("SELECT COUNT(p) FROM Post p WHERE p.author.id = :authorId")
 	Long countByAuthorId(Long authorId);
+	
+	// Atomic increment for view count (fixes race condition)
+	@Modifying
+	@Query("UPDATE Post p SET p.viewCount = p.viewCount + 1 WHERE p.id = :postId")
+	void incrementViewCount(@Param("postId") Long postId);
 }

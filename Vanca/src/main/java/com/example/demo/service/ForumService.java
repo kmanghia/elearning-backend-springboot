@@ -90,12 +90,12 @@ public class ForumService {
 	}
 
 	public PostResponse getPostById(Long postId) {
+		// Increment view count atomically (fixes race condition)
+		postRepository.incrementViewCount(postId);
+		
+		// Fetch post with updated view count
 		Post post = postRepository.findById(postId)
 				.orElseThrow(() -> new RuntimeException("Post not found"));
-
-		// Increment view count
-		post.setViewCount(post.getViewCount() + 1);
-		postRepository.save(post);
 
 		return mapToPostResponse(post);
 	}
@@ -268,7 +268,7 @@ public class ForumService {
 	// ==================== VOTE OPERATIONS ====================
 
 	public void votePost(Long postId, CreateVoteRequest request, Long userId) {
-		// Validate vote target
+		// Validate vote target FIRST (before DB queries)
 		if (request.getPostId() == null && request.getCommentId() == null) {
 			throw new RuntimeException("Must vote on either a post or comment");
 		}
@@ -310,7 +310,7 @@ public class ForumService {
 	}
 
 	public void voteComment(Long commentId, CreateVoteRequest request, Long userId) {
-		// Validate vote target
+		// Validate vote target FIRST (before DB queries)
 		if (request.getPostId() == null && request.getCommentId() == null) {
 			throw new RuntimeException("Must vote on either a post or comment");
 		}
