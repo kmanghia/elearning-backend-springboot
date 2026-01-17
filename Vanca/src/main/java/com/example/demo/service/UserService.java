@@ -3,7 +3,9 @@ package com.example.demo.service;
 import com.example.demo.dto.response.UserResponse;
 import com.example.demo.exception.BadRequestException;
 import com.example.demo.exception.ResourceNotFoundException;
+import com.example.demo.model.PasswordHistory;
 import com.example.demo.model.User;
+import com.example.demo.repository.PasswordHistoryRepository;
 import com.example.demo.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -18,6 +20,9 @@ public class UserService {
 
 	private final UserRepository userRepository;
 	private final PasswordEncoder passwordEncoder;
+	private final PasswordHistoryRepository passwordHistoryRepository;
+	
+	private static final int PASSWORD_HISTORY_LIMIT = 5;
 
 	public UserResponse getUserById(Long id) {
 		User user = userRepository.findById(id)
@@ -56,14 +61,36 @@ public class UserService {
 		User user = userRepository.findById(userId)
 			.orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
+		// Verify current password
 		if (!passwordEncoder.matches(currentPassword, user.getPassword())) {
 			throw new BadRequestException("Current password is incorrect");
 		}
 
+		// Validate new password length
 		if (newPassword.length() < 6) {
 			throw new BadRequestException("Password must be at least 6 characters long");
 		}
 
+		// Check password history - prevent reuse of last 5 passwords
+		List<PasswordHistory> recentPasswords = passwordHistoryRepository
+			.findByUserIdOrderByChangedAtDesc(userId)
+			.stream()
+			.limit(PASSWORD_HISTORY_LIMIT)
+			.toList();
+
+		for (PasswordHistory history : recentPasswords) {
+			if (passwordEncoder.matches(newPassword, history.getPasswordHash())) {
+				throw new BadRequestException("Cannot reuse recent passwords. Please choose a different password.");
+			}
+		}
+
+		// Save current password to history before changing
+		PasswordHistory passwordHistory = new PasswordHistory();
+		passwordHistory.setUser(user);
+		passwordHistory.setPasswordHash(user.getPassword());
+		passwordHistoryRepository.save(passwordHistory);
+
+		// Update password
 		user.setPassword(passwordEncoder.encode(newPassword));
 		userRepository.save(user);
 	}
