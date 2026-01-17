@@ -5,7 +5,6 @@ import com.example.demo.dto.response.CourseResponse;
 import com.example.demo.security.UserPrincipal;
 import com.example.demo.service.CourseService;
 import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -18,10 +17,14 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/courses")
-@RequiredArgsConstructor
 public class CourseController {
 
 	private final CourseService courseService;
+
+
+	public CourseController(CourseService courseService) {
+		this.courseService = courseService;
+	}
 
 	@GetMapping
 	public ResponseEntity<Page<CourseResponse>> getAllPublishedCourses(Pageable pageable) {
