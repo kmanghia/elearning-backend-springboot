@@ -9,7 +9,6 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -18,12 +17,17 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/certificates")
-@RequiredArgsConstructor
 @Tag(name = "Certificate", description = "Certificate management APIs")
 public class CertificateController {
 	
 	private final CertificateService certificateService;
 	private final JwtTokenProvider tokenProvider;
+
+
+	public CertificateController(CertificateService certificateService, JwtTokenProvider tokenProvider) {
+		this.certificateService = certificateService;
+		this.tokenProvider = tokenProvider;
+	}
 	
 	@PostMapping("/generate")
 	@PreAuthorize("hasAnyRole('ADMIN', 'INSTRUCTOR')")
