@@ -18,5 +18,5 @@ public class EnrollmentResponse {
 	private Long studentId;
 	private String studentName;
 	private LocalDateTime enrolledAt;
-	private Double progress; // Progress percentage (0-100)
+	private Integer progress; // Progress percentage (0-100)
 }

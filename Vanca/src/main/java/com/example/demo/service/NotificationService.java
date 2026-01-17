@@ -9,6 +9,8 @@ import com.example.demo.repository.UserRepository;
 import com.example.demo.exception.ResourceNotFoundException;
 import com.example.demo.exception.UnauthorizedException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -55,6 +57,16 @@ public class NotificationService {
 			.collect(Collectors.toList());
 	}
 	
+	// Paginated version
+	public Page<NotificationResponse> getUserNotifications(Long userId, Pageable pageable) {
+		// Verify user exists
+		userRepository.findById(userId)
+			.orElseThrow(() -> new ResourceNotFoundException("User not found"));
+		
+		Page<Notification> notifications = notificationRepository.findByUserId(userId, pageable);
+		return notifications.map(this::mapToResponse);
+	}
+	
 	public List<NotificationResponse> getUnreadNotifications(Long userId) {
 		// Verify user exists
 		userRepository.findById(userId)
@@ -64,6 +76,16 @@ public class NotificationService {
 		return notifications.stream()
 			.map(this::mapToResponse)
 			.collect(Collectors.toList());
+	}
+	
+	// Paginated version
+	public Page<NotificationResponse> getUnreadNotifications(Long userId, Pageable pageable) {
+		// Verify user exists
+		userRepository.findById(userId)
+			.orElseThrow(() -> new ResourceNotFoundException("User not found"));
+		
+		Page<Notification> notifications = notificationRepository.findByUserIdAndIsReadFalse(userId, pageable);
+		return notifications.map(this::mapToResponse);
 	}
 	
 	public Long getUnreadCount(Long userId) {

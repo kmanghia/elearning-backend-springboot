@@ -9,7 +9,11 @@ import org.hibernate.annotations.CreationTimestamp;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "certificates")
+@Table(name = "certificates", indexes = {
+	@Index(name = "idx_certificate_student_id", columnList = "student_id"),
+	@Index(name = "idx_certificate_course_id", columnList = "course_id"),
+	@Index(name = "idx_certificate_code", columnList = "certificate_code", unique = true)
+})
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

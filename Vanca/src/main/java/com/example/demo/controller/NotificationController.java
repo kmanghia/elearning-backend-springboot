@@ -8,6 +8,10 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -26,28 +30,34 @@ public class NotificationController {
 	@GetMapping
 	@PreAuthorize("isAuthenticated()")
 	@SecurityRequirement(name = "bearerAuth")
-	@Operation(summary = "Get all notifications", description = "Get all notifications for the logged-in user")
-	public ResponseEntity<List<NotificationResponse>> getAllNotifications(
+	@Operation(summary = "Get all notifications", description = "Get all notifications for the logged-in user with pagination")
+	public ResponseEntity<Page<NotificationResponse>> getAllNotifications(
+			@RequestParam(defaultValue = "0") int page,
+			@RequestParam(defaultValue = "20") int size,
 			HttpServletRequest request) {
 		
 		String token = tokenProvider.getTokenFromRequest(request);
 		Long userId = tokenProvider.getUserIdFromToken(token);
 		
-		List<NotificationResponse> notifications = notificationService.getUserNotifications(userId);
+		Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+		Page<NotificationResponse> notifications = notificationService.getUserNotifications(userId, pageable);
 		return ResponseEntity.ok(notifications);
 	}
 	
 	@GetMapping("/unread")
 	@PreAuthorize("isAuthenticated()")
 	@SecurityRequirement(name = "bearerAuth")
-	@Operation(summary = "Get unread notifications", description = "Get only unread notifications for the logged-in user")
-	public ResponseEntity<List<NotificationResponse>> getUnreadNotifications(
+	@Operation(summary = "Get unread notifications", description = "Get only unread notifications for the logged-in user with pagination")
+	public ResponseEntity<Page<NotificationResponse>> getUnreadNotifications(
+			@RequestParam(defaultValue = "0") int page,
+			@RequestParam(defaultValue = "20") int size,
 			HttpServletRequest request) {
 		
 		String token = tokenProvider.getTokenFromRequest(request);
 		Long userId = tokenProvider.getUserIdFromToken(token);
 		
-		List<NotificationResponse> notifications = notificationService.getUnreadNotifications(userId);
+		Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+		Page<NotificationResponse> notifications = notificationService.getUnreadNotifications(userId, pageable);
 		return ResponseEntity.ok(notifications);
 	}
 	

@@ -9,9 +9,15 @@ import org.hibernate.annotations.CreationTimestamp;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "course_reviews", uniqueConstraints = {
-	@UniqueConstraint(columnNames = {"student_id", "course_id"})
-})
+@Table(name = "course_reviews", 
+	uniqueConstraints = {
+		@UniqueConstraint(columnNames = {"student_id", "course_id"})
+	},
+	indexes = {
+		@Index(name = "idx_review_course_id", columnList = "course_id"),
+		@Index(name = "idx_review_student_id", columnList = "student_id")
+	}
+)
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -30,7 +36,7 @@ public class CourseReview {
 	private Course course;
 
 	@Column(nullable = false)
-	private Integer rating; // 1-5 stars
+	private Integer rating; // 1-5 stars (validated at DTO and service level)
 
 	@Column(columnDefinition = "TEXT")
 	private String comment;
