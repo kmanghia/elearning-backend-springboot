@@ -177,4 +177,12 @@ public class QuizService {
 	public List<QuizAttempt> getQuizResults(Long quizId, Long studentId) {
 		return attemptRepository.findByStudentIdAndQuizId(studentId, quizId);
 	}
+
+	/**
+	 * Get quiz by ID with questions
+	 */
+	public Quiz getQuiz(Long quizId) {
+		return quizRepository.findById(quizId)
+			.orElseThrow(() -> new ResourceNotFoundException("Quiz not found with id: " + quizId));
+	}
 }

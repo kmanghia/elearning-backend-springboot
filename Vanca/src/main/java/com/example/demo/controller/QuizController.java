@@ -84,5 +84,45 @@ public class QuizController {
 			.correctAnswers((int) correctAnswers)
 			.build();
 	}
+
+	private QuizResponse mapQuizToResponse(com.example.demo.model.Quiz quiz) {
+		return QuizResponse.builder()
+			.id(quiz.getId())
+			.lessonId(quiz.getLesson() != null ? quiz.getLesson().getId() : null)
+			.title(quiz.getTitle())
+			.description(quiz.getDescription())
+			.timeLimitMinutes(quiz.getTimeLimitMinutes())
+			.passingScore(quiz.getPassingScore())
+			.maxAttempts(quiz.getMaxAttempts())
+			.createdAt(quiz.getCreatedAt())
+			.updatedAt(quiz.getUpdatedAt())
+			.questions(quiz.getQuestions() != null ? 
+				quiz.getQuestions().stream()
+					.map(this::mapQuestionToResponse)
+					.collect(Collectors.toList()) : null)
+			.build();
+	}
+
+	private com.example.demo.dto.response.QuestionResponse mapQuestionToResponse(com.example.demo.model.Question question) {
+		return com.example.demo.dto.response.QuestionResponse.builder()
+			.id(question.getId())
+			.content(question.getContent())
+			.questionType(question.getQuestionType())
+			.points(question.getPoints())
+			.orderIndex(question.getOrderIndex())
+			.options(question.getOptions() != null ?
+				question.getOptions().stream()
+					.map(this::mapOptionToResponse)
+					.collect(Collectors.toList()) : null)
+			.build();
+	}
+
+	private com.example.demo.dto.response.QuestionOptionResponse mapOptionToResponse(com.example.demo.model.QuestionOption option) {
+		return com.example.demo.dto.response.QuestionOptionResponse.builder()
+			.id(option.getId())
+			.content(option.getContent())
+			.orderIndex(option.getOrderIndex())
+			.build();
+	}
 }
 
