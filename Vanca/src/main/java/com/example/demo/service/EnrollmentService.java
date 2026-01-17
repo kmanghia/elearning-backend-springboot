@@ -30,8 +30,14 @@ public class EnrollmentService {
 		Course course = courseRepository.findById(courseId)
 			.orElseThrow(() -> new ResourceNotFoundException("Course not found"));
 
-		if (course.getStatus() != Course.Status.PUBLISHED) {
+		// Bug #6 Fix: Add null check for course.getStatus()
+		if (course.getStatus() == null || course.getStatus() != Course.Status.PUBLISHED) {
 			throw new BadRequestException("Course is not published");
+		}
+
+		// Bug #7 Fix: Prevent instructor from enrolling in their own course
+		if (course.getInstructor() != null && course.getInstructor().getId().equals(studentId)) {
+			throw new BadRequestException("Instructors cannot enroll in their own courses");
 		}
 
 		if (enrollmentRepository.existsByStudentIdAndCourseId(studentId, courseId)) {
