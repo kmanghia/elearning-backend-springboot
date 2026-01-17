@@ -11,7 +11,6 @@ import com.example.demo.model.User;
 import com.example.demo.repository.CourseRepository;
 import com.example.demo.repository.LessonRepository;
 import com.example.demo.repository.UserRepository;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,30 +18,37 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-@RequiredArgsConstructor
 public class LessonService {
 
 	private final LessonRepository lessonRepository;
 	private final CourseRepository courseRepository;
 	private final UserRepository userRepository;
-	private final AwsS3Service awsS3Service;
+	private final LocalFileStorageService fileStorageService;
+
+	public LessonService(LessonRepository lessonRepository, CourseRepository courseRepository,
+			UserRepository userRepository, LocalFileStorageService fileStorageService) {
+		this.lessonRepository = lessonRepository;
+		this.courseRepository = courseRepository;
+		this.userRepository = userRepository;
+		this.fileStorageService = fileStorageService;
+	}
 
 	public List<LessonResponse> getLessonsByCourse(Long courseId) {
 		return lessonRepository.findByCourseIdOrderByOrderIndexAsc(courseId)
-			.stream()
-			.map(this::mapToResponse)
-			.collect(Collectors.toList());
+				.stream()
+				.map(this::mapToResponse)
+				.collect(Collectors.toList());
 	}
 
 	public LessonResponse getLessonById(Long id) {
 		Lesson lesson = lessonRepository.findById(id)
-			.orElseThrow(() -> new ResourceNotFoundException("Lesson not found with id: " + id));
+				.orElseThrow(() -> new ResourceNotFoundException("Lesson not found with id: " + id));
 		return mapToResponse(lesson);
 	}
 
 	public String getVideoStreamingUrl(Long lessonId, Long userId) {
 		Lesson lesson = lessonRepository.findById(lessonId)
-			.orElseThrow(() -> new ResourceNotFoundException("Lesson not found"));
+				.orElseThrow(() -> new ResourceNotFoundException("Lesson not found"));
 
 		// Check if user is enrolled or is instructor/admin
 		// Bug #13 Fix: Add null checks for lazy-loaded entities
@@ -50,21 +56,21 @@ public class LessonService {
 		if (course == null) {
 			throw new IllegalStateException("Lesson is not associated with a course");
 		}
-		
+
 		User user = userRepository.findById(userId)
-			.orElseThrow(() -> new ResourceNotFoundException("User not found"));
-		
+				.orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
 		boolean isEnrolled = false;
 		if (course.getEnrolledStudents() != null) {
 			isEnrolled = course.getEnrolledStudents().stream()
-				.anyMatch(s -> s.getId().equals(userId));
+					.anyMatch(s -> s.getId().equals(userId));
 		}
-		
+
 		boolean isInstructor = false;
 		if (course.getInstructor() != null) {
 			isInstructor = course.getInstructor().getId().equals(userId);
 		}
-		
+
 		boolean isAdmin = user.getRole() == User.Role.ADMIN;
 
 		if (!isEnrolled && !isInstructor && !isAdmin) {
@@ -76,29 +82,22 @@ public class LessonService {
 		}
 
 		String videoUrl = lesson.getVideoUrl();
-		
-		// Check if it's an S3 URL (s3:// or amazonaws.com)
-		if (isS3Url(videoUrl)) {
-			// Use AWS S3 pre-signed URL if AWS is configured
-			try {
-				String videoKey = extractS3Key(videoUrl);
-				return awsS3Service.generatePresignedUrl(videoKey);
-			} catch (RuntimeException e) {
-				// If AWS is not configured, return original URL
-				// This allows the app to work without AWS (for development/testing)
-				// In production, you should configure AWS credentials
-				return videoUrl;
-			}
+
+		// Check if it's a local storage URL (local://)
+		if (videoUrl.startsWith("local://")) {
+			// Use local file storage
+			String fileKey = videoUrl.substring(8); // Remove "local://" prefix
+			return fileStorageService.generatePresignedUrl(fileKey);
 		}
-		
-		// For other URLs (YouTube, Vimeo, direct links, local files), return as-is
+
+		// For external URLs (YouTube, Vimeo, direct links), return as-is
 		return videoUrl;
 	}
 
 	@Transactional
 	public LessonResponse createLesson(Long courseId, CreateLessonRequest request, Long instructorId) {
 		Course course = courseRepository.findById(courseId)
-			.orElseThrow(() -> new ResourceNotFoundException("Course not found"));
+				.orElseThrow(() -> new ResourceNotFoundException("Course not found"));
 
 		if (!course.getInstructor().getId().equals(instructorId)) {
 			User user = userRepository.findById(instructorId).orElseThrow();
@@ -114,7 +113,7 @@ public class LessonService {
 		lesson.setDurationSeconds(request.getDurationSeconds());
 		lesson.setIsPreview(request.getIsPreview() != null ? request.getIsPreview() : false);
 		lesson.setCourse(course);
-		
+
 		if (request.getOrderIndex() != null) {
 			lesson.setOrderIndex(request.getOrderIndex());
 		} else {
@@ -129,7 +128,7 @@ public class LessonService {
 	@Transactional
 	public LessonResponse updateLesson(Long lessonId, UpdateLessonRequest request, Long userId) {
 		Lesson lesson = lessonRepository.findById(lessonId)
-			.orElseThrow(() -> new ResourceNotFoundException("Lesson not found"));
+				.orElseThrow(() -> new ResourceNotFoundException("Lesson not found"));
 
 		Course course = lesson.getCourse();
 		User user = userRepository.findById(userId).orElseThrow();
@@ -164,7 +163,7 @@ public class LessonService {
 	@Transactional
 	public void deleteLesson(Long lessonId, Long userId) {
 		Lesson lesson = lessonRepository.findById(lessonId)
-			.orElseThrow(() -> new ResourceNotFoundException("Lesson not found"));
+				.orElseThrow(() -> new ResourceNotFoundException("Lesson not found"));
 
 		Course course = lesson.getCourse();
 		User user = userRepository.findById(userId).orElseThrow();
@@ -178,43 +177,17 @@ public class LessonService {
 
 	private LessonResponse mapToResponse(Lesson lesson) {
 		return LessonResponse.builder()
-			.id(lesson.getId())
-			.courseId(lesson.getCourse().getId())
-			.title(lesson.getTitle())
-			.description(lesson.getDescription())
-			.orderIndex(lesson.getOrderIndex())
-			.videoUrl(lesson.getVideoUrl())
-			.durationSeconds(lesson.getDurationSeconds())
-			.isPreview(lesson.getIsPreview())
-			.createdAt(lesson.getCreatedAt())
-			.updatedAt(lesson.getUpdatedAt())
-			.hasQuiz(lesson.getQuiz() != null)
-			.build();
-	}
-
-	/**
-	 * Check if URL is an AWS S3 URL
-	 */
-	private boolean isS3Url(String videoUrl) {
-		return videoUrl.startsWith("s3://") || 
-		       videoUrl.contains("amazonaws.com") ||
-		       videoUrl.contains("s3.amazonaws.com");
-	}
-
-	/**
-	 * Extract S3 key from S3 URL
-	 */
-	private String extractS3Key(String videoUrl) {
-		// Handle different URL formats
-		if (videoUrl.startsWith("s3://")) {
-			// Format: s3://bucket/key
-			return videoUrl.substring(videoUrl.indexOf("/", 5) + 1);
-		} else if (videoUrl.contains("amazonaws.com/")) {
-			// Format: https://bucket.s3.region.amazonaws.com/key
-			return videoUrl.substring(videoUrl.indexOf("amazonaws.com/") + 14);
-		}
-		// Assume it's already a key
-		return videoUrl;
+				.id(lesson.getId())
+				.courseId(lesson.getCourse().getId())
+				.title(lesson.getTitle())
+				.description(lesson.getDescription())
+				.orderIndex(lesson.getOrderIndex())
+				.videoUrl(lesson.getVideoUrl())
+				.durationSeconds(lesson.getDurationSeconds())
+				.isPreview(lesson.getIsPreview())
+				.createdAt(lesson.getCreatedAt())
+				.updatedAt(lesson.getUpdatedAt())
+				.hasQuiz(lesson.getQuiz() != null)
+				.build();
 	}
 }
-
