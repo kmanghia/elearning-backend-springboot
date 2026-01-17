@@ -4,6 +4,7 @@ import com.example.demo.dto.request.SubmitQuizRequest;
 import com.example.demo.exception.BadRequestException;
 import com.example.demo.exception.ResourceNotFoundException;
 import com.example.demo.model.*;
+import com.example.demo.model.Notification.NotificationType;
 import com.example.demo.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -22,6 +23,7 @@ public class QuizService {
 	private final QuizRepository quizRepository;
 	private final QuizAttemptRepository attemptRepository;
 	private final EnrollmentRepository enrollmentRepository;
+	private final NotificationService notificationService;
 
 	/**
 	 * Start a new quiz attempt
@@ -100,8 +102,21 @@ public class QuizService {
 		attempt.setScore(score);
 		attempt.setIsPassed(score >= quiz.getPassingScore());
 		attempt.setSubmittedAt(LocalDateTime.now());
+		
+		QuizAttempt savedAttempt = attemptRepository.save(attempt);
+		
+		// Send notification to student
+		notificationService.createNotification(
+			attempt.getStudent().getId(),
+			"Quiz Graded",
+			String.format("Your quiz '%s' has been graded. Score: %d%% (%s)",
+				quiz.getTitle(), score, attempt.getIsPassed() ? "Passed" : "Failed"),
+			NotificationType.QUIZ_GRADED,
+			"QUIZ",
+			quiz.getId()
+		);
 
-		return attemptRepository.save(attempt);
+		return savedAttempt;
 	}
 
 	/**

@@ -6,6 +6,7 @@ import com.example.demo.exception.ResourceNotFoundException;
 import com.example.demo.model.Certificate;
 import com.example.demo.model.Course;
 import com.example.demo.model.Enrollment;
+import com.example.demo.model.Notification.NotificationType;
 import com.example.demo.model.User;
 import com.example.demo.repository.CertificateRepository;
 import com.example.demo.repository.CourseRepository;
@@ -29,6 +30,7 @@ public class CertificateService {
 	private final CourseRepository courseRepository;
 	private final EnrollmentRepository enrollmentRepository;
 	private final AwsS3Service awsS3Service;
+	private final NotificationService notificationService;
 	
 	@Transactional
 	public CertificateResponse generateCertificate(CreateCertificateRequest request) {
@@ -70,6 +72,16 @@ public class CertificateService {
 			enrollment.getCompletedAt() : LocalDateTime.now());
 		
 		Certificate savedCertificate = certificateRepository.save(certificate);
+		
+		// Send notification to student
+		notificationService.createNotification(
+			request.getStudentId(),
+			"Certificate Issued",
+			String.format("Congratulations! You have earned a certificate for completing '%s'", course.getTitle()),
+			NotificationType.CERTIFICATE_ISSUED,
+			"CERTIFICATE",
+			savedCertificate.getId()
+		);
 		
 		return mapToResponse(savedCertificate);
 	}

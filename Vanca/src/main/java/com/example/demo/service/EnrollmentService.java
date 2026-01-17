@@ -4,6 +4,7 @@ import com.example.demo.exception.BadRequestException;
 import com.example.demo.exception.ResourceNotFoundException;
 import com.example.demo.model.Course;
 import com.example.demo.model.Enrollment;
+import com.example.demo.model.Notification.NotificationType;
 import com.example.demo.model.User;
 import com.example.demo.repository.CourseRepository;
 import com.example.demo.repository.EnrollmentRepository;
@@ -19,6 +20,7 @@ public class EnrollmentService {
 	private final EnrollmentRepository enrollmentRepository;
 	private final CourseRepository courseRepository;
 	private final UserRepository userRepository;
+	private final NotificationService notificationService;
 
 	@Transactional
 	public Enrollment enrollInCourse(Long courseId, Long studentId) {
@@ -40,8 +42,20 @@ public class EnrollmentService {
 		enrollment.setStudent(student);
 		enrollment.setCourse(course);
 		enrollment.setProgress(0);
+		
+		Enrollment savedEnrollment = enrollmentRepository.save(enrollment);
+		
+		// Send notification to student
+		notificationService.createNotification(
+			studentId,
+			"Enrollment Successful",
+			"You have successfully enrolled in " + course.getTitle(),
+			NotificationType.ENROLLMENT,
+			"COURSE",
+			course.getId()
+		);
 
-		return enrollmentRepository.save(enrollment);
+		return savedEnrollment;
 	}
 
 	@Transactional
