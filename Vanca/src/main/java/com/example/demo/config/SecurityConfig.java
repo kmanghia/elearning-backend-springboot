@@ -1,7 +1,6 @@
 package com.example.demo.config;
 
 import com.example.demo.security.JwtAuthenticationFilter;
-import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -24,10 +23,14 @@ import java.util.List;
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity(prePostEnabled = true)
-@RequiredArgsConstructor
 public class SecurityConfig {
 
 	private final JwtAuthenticationFilter jwtAuthenticationFilter;
+
+
+	public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter) {
+		this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+	}
 
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -49,7 +52,7 @@ public class SecurityConfig {
 					"/swagger/**"
 				).permitAll()
 				// Public endpoints
-				.requestMatchers("/api/auth/**", "/api/public/**").permitAll()
+				.requestMatchers("/api/auth/**", "/api/public/**", "/api/payments/webhook").permitAll()
 				// Actuator - allow all actuator endpoints
 				.requestMatchers("/actuator/**").permitAll()
 				// Role-based endpoints
