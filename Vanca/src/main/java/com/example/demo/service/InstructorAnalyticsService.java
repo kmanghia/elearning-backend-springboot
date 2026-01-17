@@ -149,7 +149,7 @@ public class InstructorAnalyticsService {
         
         // Calculate average quiz score for this course
         double avgQuizScore = quizAttemptRepository.findAll().stream()
-                .filter(attempt -> attempt.getQuiz().getCourse().getId().equals(course.getId()))
+                .filter(attempt -> attempt.getQuiz().getLesson().getCourse().getId().equals(course.getId()))
                 .filter(attempt -> attempt.getScore() != null)
                 .mapToDouble(QuizAttempt::getScore)
                 .average()
