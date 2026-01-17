@@ -78,8 +78,11 @@ public class InstructorAnalyticsService {
                 .average()
                 .orElse(0.0);
         
-        // Total quiz attempts
+        // Total quiz attempts - Bug #12 Fix: Add null checks for nested entities
         int totalQuizAttempts = (int) quizAttemptRepository.findAll().stream()
+                .filter(attempt -> attempt.getQuiz() != null 
+                    && attempt.getQuiz().getLesson() != null 
+                    && attempt.getQuiz().getLesson().getCourse() != null)
                 .filter(attempt -> instructorCourses.stream()
                         .anyMatch(course -> course.getId().equals(attempt.getQuiz().getLesson().getCourse().getId())))
                 .count();
@@ -147,8 +150,11 @@ public class InstructorAnalyticsService {
         int totalLessons = lessonRepository.countByCourseId(course.getId()).intValue();
         int totalQuizzes = quizRepository.countByCourseId(course.getId()).intValue();
         
-        // Calculate average quiz score for this course
+        // Calculate average quiz score for this course - Bug #12 Fix: Add null checks
         double avgQuizScore = quizAttemptRepository.findAll().stream()
+                .filter(attempt -> attempt.getQuiz() != null 
+                    && attempt.getQuiz().getLesson() != null 
+                    && attempt.getQuiz().getLesson().getCourse() != null)
                 .filter(attempt -> attempt.getQuiz().getLesson().getCourse().getId().equals(course.getId()))
                 .filter(attempt -> attempt.getScore() != null)
                 .mapToDouble(QuizAttempt::getScore)
@@ -212,12 +218,18 @@ public class InstructorAnalyticsService {
                 .average()
                 .orElse(0.0);
         
-        // Quiz metrics
+        // Quiz metrics - Bug #12 Fix: Add null checks
         int totalQuizAttempts = (int) quizAttemptRepository.findAll().stream()
+                .filter(attempt -> attempt.getQuiz() != null 
+                    && attempt.getQuiz().getLesson() != null 
+                    && attempt.getQuiz().getLesson().getCourse() != null)
                 .filter(attempt -> attempt.getQuiz().getLesson().getCourse().getId().equals(courseId))
                 .count();
         
         double avgQuizScore = quizAttemptRepository.findAll().stream()
+                .filter(attempt -> attempt.getQuiz() != null 
+                    && attempt.getQuiz().getLesson() != null 
+                    && attempt.getQuiz().getLesson().getCourse() != null)
                 .filter(attempt -> attempt.getQuiz().getLesson().getCourse().getId().equals(courseId))
                 .filter(attempt -> attempt.getScore() != null)
                 .mapToDouble(QuizAttempt::getScore)
