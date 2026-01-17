@@ -41,6 +41,18 @@ public class User {
 	@Column(nullable = false)
 	private Boolean enabled = true;
 
+	@Column(name = "email_verified", nullable = false)
+	private Boolean emailVerified = false;
+
+	@Column(name = "verification_token")
+	private String verificationToken;
+
+	@Column(nullable = false)
+	private Boolean deleted = false;
+
+	@Column(name = "deleted_at")
+	private LocalDateTime deletedAt;
+
 	@CreationTimestamp
 	@Column(name = "created_at", nullable = false, updatable = false)
 	private LocalDateTime createdAt;
@@ -64,6 +76,9 @@ public class User {
 
 	@OneToMany(mappedBy = "student", cascade = CascadeType.ALL)
 	private Set<Progress> progressRecords = new HashSet<>();
+
+	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+	private Set<PasswordHistory> passwordHistories = new HashSet<>();
 
 	public enum Role {
 		ADMIN, INSTRUCTOR, STUDENT
