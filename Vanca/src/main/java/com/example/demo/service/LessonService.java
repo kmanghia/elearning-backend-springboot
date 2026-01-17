@@ -45,12 +45,26 @@ public class LessonService {
 			.orElseThrow(() -> new ResourceNotFoundException("Lesson not found"));
 
 		// Check if user is enrolled or is instructor/admin
+		// Bug #13 Fix: Add null checks for lazy-loaded entities
 		Course course = lesson.getCourse();
-		User user = userRepository.findById(userId).orElseThrow();
+		if (course == null) {
+			throw new IllegalStateException("Lesson is not associated with a course");
+		}
 		
-		boolean isEnrolled = course.getEnrolledStudents().stream()
-			.anyMatch(s -> s.getId().equals(userId));
-		boolean isInstructor = course.getInstructor().getId().equals(userId);
+		User user = userRepository.findById(userId)
+			.orElseThrow(() -> new ResourceNotFoundException("User not found"));
+		
+		boolean isEnrolled = false;
+		if (course.getEnrolledStudents() != null) {
+			isEnrolled = course.getEnrolledStudents().stream()
+				.anyMatch(s -> s.getId().equals(userId));
+		}
+		
+		boolean isInstructor = false;
+		if (course.getInstructor() != null) {
+			isInstructor = course.getInstructor().getId().equals(userId);
+		}
+		
 		boolean isAdmin = user.getRole() == User.Role.ADMIN;
 
 		if (!isEnrolled && !isInstructor && !isAdmin) {
