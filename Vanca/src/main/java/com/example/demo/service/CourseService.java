@@ -12,7 +12,6 @@ import com.example.demo.repository.CourseRepository;
 import com.example.demo.repository.EnrollmentRepository;
 import com.example.demo.repository.LessonRepository;
 import com.example.demo.repository.UserRepository;
-import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -22,7 +21,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-@RequiredArgsConstructor
 public class CourseService {
 
 	private final CourseRepository courseRepository;
@@ -31,6 +29,15 @@ public class CourseService {
 	// Bug #2 Fix: Add repositories for count queries to avoid N+1
 	private final LessonRepository lessonRepository;
 	private final EnrollmentRepository enrollmentRepository;
+
+
+	public CourseService(CourseRepository courseRepository, UserRepository userRepository, CategoryRepository categoryRepository, LessonRepository lessonRepository, EnrollmentRepository enrollmentRepository) {
+		this.courseRepository = courseRepository;
+		this.userRepository = userRepository;
+		this.categoryRepository = categoryRepository;
+		this.lessonRepository = lessonRepository;
+		this.enrollmentRepository = enrollmentRepository;
+	}
 
 	public Page<CourseResponse> getAllPublishedCourses(Pageable pageable) {
 		Page<Course> courses = courseRepository.findByStatus(Course.Status.PUBLISHED, pageable);
