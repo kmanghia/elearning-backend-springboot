@@ -272,7 +272,7 @@ public class InstructorAnalyticsService {
     private double calculateStudentProgress(Long studentId, Long courseId) {
         List<Progress> progressList = progressRepository.findByStudentIdAndCourseId(studentId, courseId);
         int completedLessons = (int) progressList.stream()
-                .filter(Progress::isCompleted)
+                .filter(p -> Boolean.TRUE.equals(p.getIsCompleted()))
                 .count();
         
         int totalLessons = lessonRepository.countByCourseId(courseId).intValue();
