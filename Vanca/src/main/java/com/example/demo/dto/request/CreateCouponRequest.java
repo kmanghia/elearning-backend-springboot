@@ -4,16 +4,10 @@ import com.example.demo.model.Coupon;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
 public class CreateCouponRequest {
 
 	@NotBlank(message = "Coupon code is required")
@@ -35,4 +29,86 @@ public class CreateCouponRequest {
 	private LocalDateTime expirationDate;
 
 	private Boolean active = true;
+
+	// Constructors
+	public CreateCouponRequest() {
+	}
+
+	public CreateCouponRequest(String code, Coupon.DiscountType discountType, BigDecimal discountValue,
+			BigDecimal minPurchaseAmount, BigDecimal maxDiscountAmount, Integer maxUses,
+			LocalDateTime expirationDate, Boolean active) {
+		this.code = code;
+		this.discountType = discountType;
+		this.discountValue = discountValue;
+		this.minPurchaseAmount = minPurchaseAmount;
+		this.maxDiscountAmount = maxDiscountAmount;
+		this.maxUses = maxUses;
+		this.expirationDate = expirationDate;
+		this.active = active;
+	}
+
+	// Getters and Setters
+	public String getCode() {
+		return code;
+	}
+
+	public void setCode(String code) {
+		this.code = code;
+	}
+
+	public Coupon.DiscountType getDiscountType() {
+		return discountType;
+	}
+
+	public void setDiscountType(Coupon.DiscountType discountType) {
+		this.discountType = discountType;
+	}
+
+	public BigDecimal getDiscountValue() {
+		return discountValue;
+	}
+
+	public void setDiscountValue(BigDecimal discountValue) {
+		this.discountValue = discountValue;
+	}
+
+	public BigDecimal getMinPurchaseAmount() {
+		return minPurchaseAmount;
+	}
+
+	public void setMinPurchaseAmount(BigDecimal minPurchaseAmount) {
+		this.minPurchaseAmount = minPurchaseAmount;
+	}
+
+	public BigDecimal getMaxDiscountAmount() {
+		return maxDiscountAmount;
+	}
+
+	public void setMaxDiscountAmount(BigDecimal maxDiscountAmount) {
+		this.maxDiscountAmount = maxDiscountAmount;
+	}
+
+	public Integer getMaxUses() {
+		return maxUses;
+	}
+
+	public void setMaxUses(Integer maxUses) {
+		this.maxUses = maxUses;
+	}
+
+	public LocalDateTime getExpirationDate() {
+		return expirationDate;
+	}
+
+	public void setExpirationDate(LocalDateTime expirationDate) {
+		this.expirationDate = expirationDate;
+	}
+
+	public Boolean getActive() {
+		return active;
+	}
+
+	public void setActive(Boolean active) {
+		this.active = active;
+	}
 }
