@@ -6,7 +6,6 @@ import com.example.demo.dto.response.LessonResponse;
 import com.example.demo.security.UserPrincipal;
 import com.example.demo.service.LessonService;
 import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -18,10 +17,14 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/lessons")
-@RequiredArgsConstructor
 public class LessonController {
 
 	private final LessonService lessonService;
+
+
+	public LessonController(LessonService lessonService) {
+		this.lessonService = lessonService;
+	}
 
 	@GetMapping("/course/{courseId}")
 	public ResponseEntity<List<LessonResponse>> getLessonsByCourse(@PathVariable Long courseId) {
