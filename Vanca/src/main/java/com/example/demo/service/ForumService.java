@@ -61,8 +61,13 @@ public class ForumService {
 			throw new RuntimeException("You are not authorized to update this post");
 		}
 
-		post.setTitle(request.getTitle());
-		post.setContent(request.getContent());
+		// Only update fields that are provided (not null)
+		if (request.getTitle() != null && !request.getTitle().isBlank()) {
+			post.setTitle(request.getTitle());
+		}
+		if (request.getContent() != null && !request.getContent().isBlank()) {
+			post.setContent(request.getContent());
+		}
 		post.setUpdatedAt(LocalDateTime.now());
 
 		Post updatedPost = postRepository.save(post);
@@ -74,7 +79,10 @@ public class ForumService {
 				.orElseThrow(() -> new RuntimeException("Post not found"));
 
 		// Check if user is the author or instructor
-		if (!post.getAuthor().getId().equals(userId)) {
+		boolean isAuthor = post.getAuthor().getId().equals(userId);
+		boolean isInstructor = post.getCourse().getInstructor().getId().equals(userId);
+		
+		if (!isAuthor && !isInstructor) {
 			throw new RuntimeException("You are not authorized to delete this post");
 		}
 
@@ -178,7 +186,10 @@ public class ForumService {
 			throw new RuntimeException("You are not authorized to update this comment");
 		}
 
-		comment.setContent(request.getContent());
+		// Only update content if provided (not null)
+		if (request.getContent() != null && !request.getContent().isBlank()) {
+			comment.setContent(request.getContent());
+		}
 		comment.setUpdatedAt(LocalDateTime.now());
 
 		Comment updatedComment = commentRepository.save(comment);
