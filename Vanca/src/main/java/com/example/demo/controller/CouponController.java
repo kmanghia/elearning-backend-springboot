@@ -8,7 +8,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -19,11 +18,14 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/coupons")
-@RequiredArgsConstructor
 @Tag(name = "Coupon", description = "Coupon and discount management APIs")
 public class CouponController {
 
 	private final CouponService couponService;
+
+	public CouponController(CouponService couponService) {
+		this.couponService = couponService;
+	}
 
 	@PostMapping
 	@PreAuthorize("hasRole('ADMIN')")
@@ -57,8 +59,8 @@ public class CouponController {
 	@SecurityRequirement(name = "bearerAuth")
 	@Operation(summary = "Update coupon", description = "Update coupon details (admin only)")
 	public ResponseEntity<CouponResponse> updateCoupon(
-		@PathVariable Long id,
-		@Valid @RequestBody CreateCouponRequest request) {
+			@PathVariable Long id,
+			@Valid @RequestBody CreateCouponRequest request) {
 		CouponResponse response = couponService.updateCoupon(id, request);
 		return ResponseEntity.ok(response);
 	}
@@ -75,8 +77,8 @@ public class CouponController {
 	@GetMapping("/validate/{code}")
 	@Operation(summary = "Validate coupon", description = "Check if coupon is valid and calculate discount")
 	public ResponseEntity<DiscountCalculationResponse> validateCoupon(
-		@PathVariable String code,
-		@RequestParam BigDecimal price) {
+			@PathVariable String code,
+			@RequestParam BigDecimal price) {
 		DiscountCalculationResponse response = couponService.calculateDiscount(code, price);
 		return ResponseEntity.ok(response);
 	}
