@@ -214,11 +214,11 @@ public class InstructorAnalyticsService {
         
         // Quiz metrics
         int totalQuizAttempts = (int) quizAttemptRepository.findAll().stream()
-                .filter(attempt -> attempt.getQuiz().getCourse().getId().equals(courseId))
+                .filter(attempt -> attempt.getQuiz().getLesson().getCourse().getId().equals(courseId))
                 .count();
         
         double avgQuizScore = quizAttemptRepository.findAll().stream()
-                .filter(attempt -> attempt.getQuiz().getCourse().getId().equals(courseId))
+                .filter(attempt -> attempt.getQuiz().getLesson().getCourse().getId().equals(courseId))
                 .filter(attempt -> attempt.getScore() != null)
                 .mapToDouble(QuizAttempt::getScore)
                 .average()
