@@ -75,11 +75,11 @@ public class CourseReviewController {
 	}
 	
 	@GetMapping("/course/{courseId}")
-	@Operation(summary = "Get course reviews", description = "Get all reviews for a course")
-	public ResponseEntity<List<ReviewResponse>> getCourseReviews(
-			@PathVariable Long courseId) {
-		
-		List<ReviewResponse> reviews = courseReviewService.getCourseReviews(courseId);
+	@Operation(summary = "Get reviews by course", description = "Get all reviews for a specific course with pagination")
+	public ResponseEntity<Page<CourseReviewResponse>> getReviewsByCourse(
+		@PathVariable Long courseId,
+		Pageable pageable) { 
+		Page<CourseReviewResponse> reviews = courseReviewService.getReviewsByCourse(courseId, pageable);
 		return ResponseEntity.ok(reviews);
 	}
 	
