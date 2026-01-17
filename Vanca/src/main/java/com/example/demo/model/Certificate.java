@@ -1,22 +1,16 @@
 package com.example.demo.model;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "certificates", indexes = {
-	@Index(name = "idx_certificate_student_id", columnList = "student_id"),
-	@Index(name = "idx_certificate_course_id", columnList = "course_id"),
-	@Index(name = "idx_certificate_code", columnList = "certificate_code", unique = true)
+		@Index(name = "idx_certificate_student_id", columnList = "student_id"),
+		@Index(name = "idx_certificate_course_id", columnList = "course_id"),
+		@Index(name = "idx_certificate_code", columnList = "certificate_code", unique = true)
 })
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
 public class Certificate {
 
 	@Id
@@ -43,4 +37,76 @@ public class Certificate {
 
 	@Column(name = "completion_date", nullable = false)
 	private LocalDateTime completionDate;
+
+	// Constructors
+	public Certificate() {
+	}
+
+	public Certificate(Long id, User student, Course course, String certificateCode, String pdfUrl,
+			LocalDateTime issuedAt, LocalDateTime completionDate) {
+		this.id = id;
+		this.student = student;
+		this.course = course;
+		this.certificateCode = certificateCode;
+		this.pdfUrl = pdfUrl;
+		this.issuedAt = issuedAt;
+		this.completionDate = completionDate;
+	}
+
+	// Getters and Setters
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	public User getStudent() {
+		return student;
+	}
+
+	public void setStudent(User student) {
+		this.student = student;
+	}
+
+	public Course getCourse() {
+		return course;
+	}
+
+	public void setCourse(Course course) {
+		this.course = course;
+	}
+
+	public String getCertificateCode() {
+		return certificateCode;
+	}
+
+	public void setCertificateCode(String certificateCode) {
+		this.certificateCode = certificateCode;
+	}
+
+	public String getPdfUrl() {
+		return pdfUrl;
+	}
+
+	public void setPdfUrl(String pdfUrl) {
+		this.pdfUrl = pdfUrl;
+	}
+
+	public LocalDateTime getIssuedAt() {
+		return issuedAt;
+	}
+
+	public void setIssuedAt(LocalDateTime issuedAt) {
+		this.issuedAt = issuedAt;
+	}
+
+	public LocalDateTime getCompletionDate() {
+		return completionDate;
+	}
+
+	public void setCompletionDate(LocalDateTime completionDate) {
+		this.completionDate = completionDate;
+	}
 }
