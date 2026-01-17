@@ -1,22 +1,16 @@
 package com.example.demo.model;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "notifications", indexes = {
-	@Index(name = "idx_notification_user_id", columnList = "user_id"),
-	@Index(name = "idx_notification_is_read", columnList = "is_read"),
-	@Index(name = "idx_notification_created_at", columnList = "created_at")
+		@Index(name = "idx_notification_user_id", columnList = "user_id"),
+		@Index(name = "idx_notification_is_read", columnList = "is_read"),
+		@Index(name = "idx_notification_created_at", columnList = "created_at")
 })
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
 public class Notification {
 
 	@Id
@@ -50,8 +44,98 @@ public class Notification {
 	@Column(name = "created_at", nullable = false, updatable = false)
 	private LocalDateTime createdAt;
 
+	// Constructors
+	public Notification() {
+	}
+
+	public Notification(Long id, User user, String title, String message, NotificationType type,
+			Boolean isRead, String relatedEntityType, Long relatedEntityId, LocalDateTime createdAt) {
+		this.id = id;
+		this.user = user;
+		this.title = title;
+		this.message = message;
+		this.type = type;
+		this.isRead = isRead;
+		this.relatedEntityType = relatedEntityType;
+		this.relatedEntityId = relatedEntityId;
+		this.createdAt = createdAt;
+	}
+
+	// Getters and Setters
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	public User getUser() {
+		return user;
+	}
+
+	public void setUser(User user) {
+		this.user = user;
+	}
+
+	public String getTitle() {
+		return title;
+	}
+
+	public void setTitle(String title) {
+		this.title = title;
+	}
+
+	public String getMessage() {
+		return message;
+	}
+
+	public void setMessage(String message) {
+		this.message = message;
+	}
+
+	public NotificationType getType() {
+		return type;
+	}
+
+	public void setType(NotificationType type) {
+		this.type = type;
+	}
+
+	public Boolean getIsRead() {
+		return isRead;
+	}
+
+	public void setIsRead(Boolean isRead) {
+		this.isRead = isRead;
+	}
+
+	public String getRelatedEntityType() {
+		return relatedEntityType;
+	}
+
+	public void setRelatedEntityType(String relatedEntityType) {
+		this.relatedEntityType = relatedEntityType;
+	}
+
+	public Long getRelatedEntityId() {
+		return relatedEntityId;
+	}
+
+	public void setRelatedEntityId(Long relatedEntityId) {
+		this.relatedEntityId = relatedEntityId;
+	}
+
+	public LocalDateTime getCreatedAt() {
+		return createdAt;
+	}
+
+	public void setCreatedAt(LocalDateTime createdAt) {
+		this.createdAt = createdAt;
+	}
+
 	public enum NotificationType {
 		ENROLLMENT, QUIZ_GRADED, CERTIFICATE_ISSUED, COURSE_UPDATE,
-		NEW_LESSON, DISCUSSION_REPLY, ACHIEVEMENT_UNLOCKED, GENERAL
+		NEW_LESSON, DISCUSSION_REPLY, ACHIEVEMENT_UNLOCKED, GENERAL, SYSTEM
 	}
 }
