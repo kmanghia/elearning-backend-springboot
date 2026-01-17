@@ -1,9 +1,11 @@
 package com.example.demo.controller;
 
+import com.example.demo.dto.request.CreateLessonRequest;
+import com.example.demo.dto.request.UpdateLessonRequest;
 import com.example.demo.dto.response.LessonResponse;
-import com.example.demo.model.Lesson;
 import com.example.demo.security.UserPrincipal;
 import com.example.demo.service.LessonService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -44,9 +46,9 @@ public class LessonController {
 	@PreAuthorize("hasAnyRole('INSTRUCTOR', 'ADMIN')")
 	public ResponseEntity<LessonResponse> createLesson(
 		@PathVariable Long courseId,
-		@RequestBody Lesson lesson,
+		@Valid @RequestBody CreateLessonRequest request,
 		@AuthenticationPrincipal UserPrincipal userPrincipal) {
-		LessonResponse created = lessonService.createLesson(courseId, lesson, userPrincipal.getId());
+		LessonResponse created = lessonService.createLesson(courseId, request, userPrincipal.getId());
 		return ResponseEntity.status(HttpStatus.CREATED).body(created);
 	}
 
@@ -54,9 +56,9 @@ public class LessonController {
 	@PreAuthorize("hasAnyRole('INSTRUCTOR', 'ADMIN')")
 	public ResponseEntity<LessonResponse> updateLesson(
 		@PathVariable Long id,
-		@RequestBody Lesson lesson,
+		@Valid @RequestBody UpdateLessonRequest request,
 		@AuthenticationPrincipal UserPrincipal userPrincipal) {
-		return ResponseEntity.ok(lessonService.updateLesson(id, lesson, userPrincipal.getId()));
+		return ResponseEntity.ok(lessonService.updateLesson(id, request, userPrincipal.getId()));
 	}
 
 	@DeleteMapping("/{id}")

@@ -1,5 +1,7 @@
 package com.example.demo.service;
 
+import com.example.demo.dto.request.CreateLessonRequest;
+import com.example.demo.dto.request.UpdateLessonRequest;
 import com.example.demo.dto.response.LessonResponse;
 import com.example.demo.exception.ResourceNotFoundException;
 import com.example.demo.exception.UnauthorizedException;
@@ -80,7 +82,7 @@ public class LessonService {
 	}
 
 	@Transactional
-	public LessonResponse createLesson(Long courseId, Lesson lesson, Long instructorId) {
+	public LessonResponse createLesson(Long courseId, CreateLessonRequest request, Long instructorId) {
 		Course course = courseRepository.findById(courseId)
 			.orElseThrow(() -> new ResourceNotFoundException("Course not found"));
 
@@ -91,8 +93,17 @@ public class LessonService {
 			}
 		}
 
+		Lesson lesson = new Lesson();
+		lesson.setTitle(request.getTitle());
+		lesson.setDescription(request.getDescription());
+		lesson.setVideoUrl(request.getVideoUrl());
+		lesson.setDurationSeconds(request.getDurationSeconds());
+		lesson.setIsPreview(request.getIsPreview() != null ? request.getIsPreview() : false);
 		lesson.setCourse(course);
-		if (lesson.getOrderIndex() == null) {
+		
+		if (request.getOrderIndex() != null) {
+			lesson.setOrderIndex(request.getOrderIndex());
+		} else {
 			List<Lesson> existingLessons = lessonRepository.findByCourseIdOrderByOrderIndexAsc(courseId);
 			lesson.setOrderIndex(existingLessons.size() + 1);
 		}
@@ -102,7 +113,7 @@ public class LessonService {
 	}
 
 	@Transactional
-	public LessonResponse updateLesson(Long lessonId, Lesson lessonDetails, Long userId) {
+	public LessonResponse updateLesson(Long lessonId, UpdateLessonRequest request, Long userId) {
 		Lesson lesson = lessonRepository.findById(lessonId)
 			.orElseThrow(() -> new ResourceNotFoundException("Lesson not found"));
 
@@ -113,20 +124,23 @@ public class LessonService {
 			throw new UnauthorizedException("You don't have permission to update this lesson");
 		}
 
-		if (lessonDetails.getTitle() != null) {
-			lesson.setTitle(lessonDetails.getTitle());
+		if (request.getTitle() != null) {
+			lesson.setTitle(request.getTitle());
 		}
-		if (lessonDetails.getDescription() != null) {
-			lesson.setDescription(lessonDetails.getDescription());
+		if (request.getDescription() != null) {
+			lesson.setDescription(request.getDescription());
 		}
-		if (lessonDetails.getVideoUrl() != null) {
-			lesson.setVideoUrl(lessonDetails.getVideoUrl());
+		if (request.getVideoUrl() != null) {
+			lesson.setVideoUrl(request.getVideoUrl());
 		}
-		if (lessonDetails.getDurationSeconds() != null) {
-			lesson.setDurationSeconds(lessonDetails.getDurationSeconds());
+		if (request.getDurationSeconds() != null) {
+			lesson.setDurationSeconds(request.getDurationSeconds());
 		}
-		if (lessonDetails.getIsPreview() != null) {
-			lesson.setIsPreview(lessonDetails.getIsPreview());
+		if (request.getIsPreview() != null) {
+			lesson.setIsPreview(request.getIsPreview());
+		}
+		if (request.getOrderIndex() != null) {
+			lesson.setOrderIndex(request.getOrderIndex());
 		}
 
 		lesson = lessonRepository.save(lesson);
