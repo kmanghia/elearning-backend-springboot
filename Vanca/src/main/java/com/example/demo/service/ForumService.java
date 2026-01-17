@@ -10,7 +10,6 @@ import com.example.demo.dto.response.PostResponse;
 import com.example.demo.model.*;
 import com.example.demo.repository.*;
 import jakarta.transaction.Transactional;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -18,7 +17,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-@RequiredArgsConstructor
 @Transactional
 public class ForumService {
 
@@ -27,6 +25,15 @@ public class ForumService {
 	private final VoteRepository voteRepository;
 	private final CourseRepository courseRepository;
 	private final UserRepository userRepository;
+
+
+	public ForumService(PostRepository postRepository, CommentRepository commentRepository, VoteRepository voteRepository, CourseRepository courseRepository, UserRepository userRepository) {
+		this.postRepository = postRepository;
+		this.commentRepository = commentRepository;
+		this.voteRepository = voteRepository;
+		this.courseRepository = courseRepository;
+		this.userRepository = userRepository;
+	}
 
 	// ==================== POST OPERATIONS ====================
 
@@ -46,7 +53,7 @@ public class ForumService {
 		post.setIsPinned(false);
 		post.setIsResolved(false);
 		post.setViewCount(0);
-		post.setVoteCount(0);
+		post.setVoteCount(0L);
 
 		Post savedPost = postRepository.save(post);
 		return mapToPostResponse(savedPost);
@@ -81,7 +88,7 @@ public class ForumService {
 		// Check if user is the author or instructor
 		boolean isAuthor = post.getAuthor().getId().equals(userId);
 		boolean isInstructor = post.getCourse().getInstructor().getId().equals(userId);
-		
+
 		if (!isAuthor && !isInstructor) {
 			throw new RuntimeException("You are not authorized to delete this post");
 		}
@@ -92,7 +99,7 @@ public class ForumService {
 	public PostResponse getPostById(Long postId) {
 		// Increment view count atomically (fixes race condition)
 		postRepository.incrementViewCount(postId);
-		
+
 		// Fetch post with updated view count
 		Post post = postRepository.findById(postId)
 				.orElseThrow(() -> new RuntimeException("Post not found"));
@@ -164,18 +171,18 @@ public class ForumService {
 		comment.setAuthor(author);
 		comment.setContent(request.getContent());
 		comment.setIsAcceptedAnswer(false);
-		comment.setVoteCount(0);
+		comment.setVoteCount(0L);
 
 		// Handle parent comment for threaded replies
 		if (request.getParentCommentId() != null) {
 			Comment parentComment = commentRepository.findById(request.getParentCommentId())
 					.orElseThrow(() -> new RuntimeException("Parent comment not found"));
-			
+
 			// Validate parent comment belongs to the same post
 			if (!parentComment.getPost().getId().equals(post.getId())) {
 				throw new RuntimeException("Parent comment must belong to the same post");
 			}
-			
+
 			comment.setParentComment(parentComment);
 		}
 
@@ -213,9 +220,9 @@ public class ForumService {
 
 		// Get parent info before deletion for vote recalculation
 		Comment parentComment = comment.getParentComment();
-		
+
 		commentRepository.delete(comment);
-		
+
 		// Recalculate parent comment vote count if exists (fixes denormalization bug)
 		if (parentComment != null) {
 			updateCommentVoteCount(parentComment);
@@ -262,11 +269,11 @@ public class ForumService {
 
 			// Mark this comment as accepted
 			comment.setIsAcceptedAnswer(true);
-			
+
 			// Mark post as resolved
 			post.setIsResolved(true);
 		}
-		
+
 		Comment updatedComment = commentRepository.save(comment);
 		postRepository.save(post);
 
@@ -283,7 +290,7 @@ public class ForumService {
 		if (request.getPostId() != null && request.getCommentId() != null) {
 			throw new RuntimeException("Cannot vote on both post and comment simultaneously");
 		}
-		
+
 		User user = userRepository.findById(userId)
 				.orElseThrow(() -> new RuntimeException("User not found"));
 
@@ -313,8 +320,7 @@ public class ForumService {
 					vote.setVoteType(request.getVoteType());
 					voteRepository.save(vote);
 					updatePostVoteCount(post);
-				}
-		);
+				});
 	}
 
 	public void voteComment(Long commentId, CreateVoteRequest request, Long userId) {
@@ -325,7 +331,7 @@ public class ForumService {
 		if (request.getPostId() != null && request.getCommentId() != null) {
 			throw new RuntimeException("Cannot vote on both post and comment simultaneously");
 		}
-		
+
 		User user = userRepository.findById(userId)
 				.orElseThrow(() -> new RuntimeException("User not found"));
 
@@ -355,8 +361,7 @@ public class ForumService {
 					vote.setVoteType(request.getVoteType());
 					voteRepository.save(vote);
 					updateCommentVoteCount(comment);
-				}
-		);
+				});
 	}
 
 	// ==================== HELPER METHODS ====================
