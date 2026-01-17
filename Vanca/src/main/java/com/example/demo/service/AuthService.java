@@ -8,7 +8,6 @@ import com.example.demo.model.User;
 import com.example.demo.repository.UserRepository;
 import com.example.demo.security.JwtTokenProvider;
 import com.example.demo.security.UserPrincipal;
-import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -18,13 +17,20 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@RequiredArgsConstructor
 public class AuthService {
 
 	private final UserRepository userRepository;
 	private final PasswordEncoder passwordEncoder;
 	private final JwtTokenProvider tokenProvider;
 	private final AuthenticationManager authenticationManager;
+
+	public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder,
+			JwtTokenProvider tokenProvider, AuthenticationManager authenticationManager) {
+		this.userRepository = userRepository;
+		this.passwordEncoder = passwordEncoder;
+		this.tokenProvider = tokenProvider;
+		this.authenticationManager = authenticationManager;
+	}
 
 	@Transactional
 	public JwtAuthenticationResponse register(RegisterRequest request) {
@@ -42,24 +48,23 @@ public class AuthService {
 		user = userRepository.save(user);
 
 		String token = tokenProvider.generateTokenFromUsername(
-			user.getEmail(), user.getId(), user.getRole().name());
+				user.getEmail(), user.getId(), user.getRole().name());
 
 		return new JwtAuthenticationResponse(
-			token, "Bearer", user.getId(), user.getEmail(), user.getRole().name());
+				token, "Bearer", user.getId(), user.getEmail(), user.getRole().name());
 	}
 
 	public JwtAuthenticationResponse login(LoginRequest request) {
 		Authentication authentication = authenticationManager.authenticate(
-			new UsernamePasswordAuthenticationToken(
-				request.getEmail(), request.getPassword()));
+				new UsernamePasswordAuthenticationToken(
+						request.getEmail(), request.getPassword()));
 
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 		UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
 		String token = tokenProvider.generateToken(authentication);
 
 		return new JwtAuthenticationResponse(
-			token, "Bearer", userPrincipal.getId(), 
-			userPrincipal.getEmail(), userPrincipal.getRole().name());
+				token, "Bearer", userPrincipal.getId(),
+				userPrincipal.getEmail(), userPrincipal.getRole().name());
 	}
 }
-
