@@ -242,7 +242,7 @@ public class InstructorAnalyticsService {
     private boolean hasRecentActivity(Long studentId, List<Course> courses, LocalDateTime since) {
         return courses.stream()
                 .flatMap(c -> progressRepository.findByStudentIdAndCourseId(studentId, c.getId()).stream())
-                .anyMatch(p -> p.getLastAccessedAt().isAfter(since));
+                .anyMatch(p -> p.getLastWatchedAt() != null && p.getLastWatchedAt().isAfter(since));
     }
     
     private double calculateCourseCompletionRate(Course course) {
