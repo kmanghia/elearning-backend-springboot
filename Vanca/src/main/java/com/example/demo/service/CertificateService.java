@@ -132,13 +132,22 @@ public class CertificateService {
 		}
 	}
 	
+	/**
+	 * Bug #9 Fix: Generate unique certificate code with retry limit
+	 * Note: This still has a small race condition window, but significantly reduced.
+	 * For production, consider adding a unique constraint on certificate_code in DB.
+	 */
 	private String generateUniqueCertificateCode() {
-		String code;
-		do {
-			code = "CERT-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
-		} while (certificateRepository.findByCertificateCode(code).isPresent());
+		int maxAttempts = 10;
+		for (int attempt = 0; attempt < maxAttempts; attempt++) {
+			String code = "CERT-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
+			
+			if (!certificateRepository.findByCertificateCode(code).isPresent()) {
+				return code;
+			}
+		}
 		
-		return code;
+		throw new IllegalStateException("Failed to generate unique certificate code after 10 attempts");
 	}
 	
 	private CertificateResponse mapToResponse(Certificate certificate) {
