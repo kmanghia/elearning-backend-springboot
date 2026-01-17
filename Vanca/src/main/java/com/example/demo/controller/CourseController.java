@@ -6,6 +6,8 @@ import com.example.demo.security.UserPrincipal;
 import com.example.demo.service.CourseService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -22,8 +24,8 @@ public class CourseController {
 	private final CourseService courseService;
 
 	@GetMapping
-	public ResponseEntity<List<CourseResponse>> getAllPublishedCourses() {
-		return ResponseEntity.ok(courseService.getAllPublishedCourses());
+	public ResponseEntity<Page<CourseResponse>> getAllPublishedCourses(Pageable pageable) {
+		return ResponseEntity.ok(courseService.getAllPublishedCourses(pageable));
 	}
 
 	@GetMapping("/{id}")

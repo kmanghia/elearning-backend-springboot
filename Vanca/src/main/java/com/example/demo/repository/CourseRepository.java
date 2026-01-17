@@ -2,6 +2,8 @@ package com.example.demo.repository;
 
 import com.example.demo.model.Course;
 import com.example.demo.model.User;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -12,7 +14,7 @@ import java.util.List;
 @Repository
 public interface CourseRepository extends JpaRepository<Course, Long> {
 	List<Course> findByInstructor(User instructor);
-	List<Course> findByStatus(Course.Status status);
+	Page<Course> findByStatus(Course.Status status, Pageable pageable);
 	
 	@Query("SELECT c FROM Course c WHERE c.status = :status ORDER BY c.createdAt DESC")
 	List<Course> findPublishedCourses(@Param("status") Course.Status status);
