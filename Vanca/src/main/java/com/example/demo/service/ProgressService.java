@@ -23,6 +23,7 @@ public class ProgressService {
 	private final LessonRepository lessonRepository;
 	private final EnrollmentRepository enrollmentRepository;
 	private final CourseRepository courseRepository;
+	private final UserRepository userRepository;
 
 	/**
 	 * Update lesson progress
@@ -34,9 +35,11 @@ public class ProgressService {
 
 		Progress progress = progressRepository.findByStudentIdAndLessonId(studentId, lessonId)
 			.orElseGet(() -> {
+				// Bug #11 Fix: Load User from repository instead of creating transient object
+				User student = userRepository.findById(studentId)
+					.orElseThrow(() -> new ResourceNotFoundException("Student not found"));
+				
 				Progress newProgress = new Progress();
-				User student = new User();
-				student.setId(studentId);
 				newProgress.setStudent(student);
 				newProgress.setLesson(lesson);
 				return newProgress;
