@@ -17,4 +17,14 @@ public interface CourseReviewRepository extends JpaRepository<CourseReview, Long
 	
 	@Query("SELECT COUNT(r) FROM CourseReview r WHERE r.course.id = :courseId")
 	Long getReviewCountByCourseId(Long courseId);
+	
+	// Convenience methods for analytics
+	default java.util.Optional<Double> getAverageByCourseId(Long courseId) {
+		Double avg = getAverageRatingByCourseId(courseId);
+		return avg != null ? java.util.Optional.of(avg) : java.util.Optional.empty();
+	}
+	
+	default Long countByCourseId(Long courseId) {
+		return getReviewCountByCourseId(courseId);
+	}
 }
