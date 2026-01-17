@@ -1,9 +1,6 @@
 package com.example.demo.model;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
@@ -12,9 +9,6 @@ import java.util.List;
 
 @Entity
 @Table(name = "quiz_attempts")
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
 public class QuizAttempt {
 
 	@Id
@@ -45,5 +39,85 @@ public class QuizAttempt {
 	// Relationships
 	@OneToMany(mappedBy = "attempt", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<QuizAnswer> answers = new ArrayList<>();
-}
 
+	// Constructors
+	public QuizAttempt() {
+	}
+
+	public QuizAttempt(Long id, User student, Quiz quiz, LocalDateTime startedAt, LocalDateTime submittedAt,
+			Integer score, Boolean isPassed, List<QuizAnswer> answers) {
+		this.id = id;
+		this.student = student;
+		this.quiz = quiz;
+		this.startedAt = startedAt;
+		this.submittedAt = submittedAt;
+		this.score = score;
+		this.isPassed = isPassed;
+		this.answers = answers;
+	}
+
+	// Getters and Setters
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	public User getStudent() {
+		return student;
+	}
+
+	public void setStudent(User student) {
+		this.student = student;
+	}
+
+	public Quiz getQuiz() {
+		return quiz;
+	}
+
+	public void setQuiz(Quiz quiz) {
+		this.quiz = quiz;
+	}
+
+	public LocalDateTime getStartedAt() {
+		return startedAt;
+	}
+
+	public void setStartedAt(LocalDateTime startedAt) {
+		this.startedAt = startedAt;
+	}
+
+	public LocalDateTime getSubmittedAt() {
+		return submittedAt;
+	}
+
+	public void setSubmittedAt(LocalDateTime submittedAt) {
+		this.submittedAt = submittedAt;
+	}
+
+	public Integer getScore() {
+		return score;
+	}
+
+	public void setScore(Integer score) {
+		this.score = score;
+	}
+
+	public Boolean getIsPassed() {
+		return isPassed;
+	}
+
+	public void setIsPassed(Boolean isPassed) {
+		this.isPassed = isPassed;
+	}
+
+	public List<QuizAnswer> getAnswers() {
+		return answers;
+	}
+
+	public void setAnswers(List<QuizAnswer> answers) {
+		this.answers = answers;
+	}
+}
