@@ -211,7 +211,15 @@ public class ForumService {
 			throw new RuntimeException("You are not authorized to delete this comment");
 		}
 
+		// Get parent info before deletion for vote recalculation
+		Comment parentComment = comment.getParentComment();
+		
 		commentRepository.delete(comment);
+		
+		// Recalculate parent comment vote count if exists (fixes denormalization bug)
+		if (parentComment != null) {
+			updateCommentVoteCount(parentComment);
+		}
 	}
 
 	public List<CommentResponse> getCommentsByPost(Long postId) {
@@ -356,14 +364,14 @@ public class ForumService {
 	private void updatePostVoteCount(Post post) {
 		Long upvotes = voteRepository.countUpvotesByPostId(post.getId());
 		Long downvotes = voteRepository.countDownvotesByPostId(post.getId());
-		post.setVoteCount(Math.toIntExact(upvotes - downvotes));
+		post.setVoteCount(upvotes - downvotes); // No Math.toIntExact needed - using Long now
 		postRepository.save(post);
 	}
 
 	private void updateCommentVoteCount(Comment comment) {
 		Long upvotes = voteRepository.countUpvotesByCommentId(comment.getId());
 		Long downvotes = voteRepository.countDownvotesByCommentId(comment.getId());
-		comment.setVoteCount(Math.toIntExact(upvotes - downvotes));
+		comment.setVoteCount(upvotes - downvotes); // No Math.toIntExact needed - using Long now
 		commentRepository.save(comment);
 	}
 

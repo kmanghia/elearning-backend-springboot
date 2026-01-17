@@ -55,7 +55,7 @@ public class Post {
 	private Integer viewCount = 0;
 
 	@Column(name = "vote_count", nullable = false)
-	private Integer voteCount = 0;
+	private Long voteCount = 0L;
 
 	@OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<Comment> comments = new ArrayList<>();

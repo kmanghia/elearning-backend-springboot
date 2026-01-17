@@ -50,7 +50,7 @@ public class Comment {
 	private Boolean isAcceptedAnswer = false;
 
 	@Column(name = "vote_count", nullable = false)
-	private Integer voteCount = 0;
+	private Long voteCount = 0L;
 
 	@OneToMany(mappedBy = "comment", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<Vote> votes = new ArrayList<>();

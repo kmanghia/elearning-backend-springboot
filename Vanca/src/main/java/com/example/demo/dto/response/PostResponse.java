@@ -25,7 +25,7 @@ public class PostResponse {
 	private Boolean isPinned;
 	private Boolean isResolved;
 	private Integer viewCount;
-	private Integer voteCount;
+	private Long voteCount;
 	private Integer commentCount;
 	private LocalDateTime createdAt;
 	private LocalDateTime updatedAt;

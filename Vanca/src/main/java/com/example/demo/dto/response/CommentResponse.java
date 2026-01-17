@@ -21,7 +21,7 @@ public class CommentResponse {
 	private Long parentCommentId;
 	private String content;
 	private Boolean isAcceptedAnswer;
-	private Integer voteCount;
+	private Long voteCount;
 	private List<CommentResponse> replies;
 	private LocalDateTime createdAt;
 	private LocalDateTime updatedAt;
