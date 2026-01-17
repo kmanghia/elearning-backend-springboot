@@ -85,4 +85,17 @@ public class CertificateController {
 		CertificateResponse certificate = certificateService.getCertificateByCourse(userId, courseId);
 		return ResponseEntity.ok(certificate);
 	}
+	
+	@GetMapping("/{id}/download")
+	@PreAuthorize("isAuthenticated()")
+	@SecurityRequirement(name = "bearerAuth")
+	@Operation(summary = "Download certificate as PDF", description = "Download certificate in PDF format")
+	public ResponseEntity<byte[]> downloadCertificatePDF(@PathVariable Long id) {
+		byte[] pdfBytes = certificateService.downloadCertificatePDF(id);
+		
+		return ResponseEntity.ok()
+			.header("Content-Type", "application/pdf")
+			.header("Content-Disposition", "attachment; filename=certificate-" + id + ".pdf")
+			.body(pdfBytes);
+	}
 }
