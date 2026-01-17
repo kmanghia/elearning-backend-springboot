@@ -5,7 +5,6 @@ import com.example.demo.security.UserPrincipal;
 import com.example.demo.service.RecommendationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -13,11 +12,15 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/recommendations")
-@RequiredArgsConstructor
 @Tag(name = "Recommendations", description = "Course recommendation endpoints")
 public class RecommendationController {
     
     private final RecommendationService recommendationService;
+
+
+	public RecommendationController(RecommendationService recommendationService) {
+		this.recommendationService = recommendationService;
+	}
     
     @GetMapping("/personalized")
     @PreAuthorize("hasRole('STUDENT')")
