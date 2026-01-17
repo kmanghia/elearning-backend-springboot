@@ -11,7 +11,6 @@ import com.example.demo.service.ForumService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -21,11 +20,15 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/forum")
-@RequiredArgsConstructor
 @Tag(name = "Forum", description = "Discussion Forum Management APIs")
 public class ForumController {
 
 	private final ForumService forumService;
+
+
+	public ForumController(ForumService forumService) {
+		this.forumService = forumService;
+	}
 
 	// ==================== POST ENDPOINTS ====================
 
