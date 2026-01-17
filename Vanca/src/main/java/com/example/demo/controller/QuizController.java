@@ -1,9 +1,11 @@
 package com.example.demo.controller;
 
+import com.example.demo.dto.request.SubmitQuizRequest;
 import com.example.demo.dto.response.QuizAttemptResponse;
 import com.example.demo.dto.response.QuizResponse;
 import com.example.demo.security.UserPrincipal;
 import com.example.demo.service.QuizService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -41,8 +43,8 @@ public class QuizController {
 	@PreAuthorize("hasRole('STUDENT')")
 	public ResponseEntity<QuizAttemptResponse> submitQuiz(
 		@PathVariable Long attemptId,
-		@RequestBody List<QuizService.QuizAnswerSubmission> answers) {
-		var attempt = quizService.submitQuiz(attemptId, answers);
+		@Valid @RequestBody SubmitQuizRequest request) {
+		var attempt = quizService.submitQuiz(attemptId, request.getAnswers());
 		return ResponseEntity.ok(mapToResponse(attempt));
 	}
 

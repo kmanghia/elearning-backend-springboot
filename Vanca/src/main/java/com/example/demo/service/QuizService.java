@@ -1,5 +1,6 @@
 package com.example.demo.service;
 
+import com.example.demo.dto.request.SubmitQuizRequest;
 import com.example.demo.exception.BadRequestException;
 import com.example.demo.exception.ResourceNotFoundException;
 import com.example.demo.model.*;
@@ -58,7 +59,7 @@ public class QuizService {
 	 * Submit quiz and auto-grade
 	 */
 	@Transactional
-	public QuizAttempt submitQuiz(Long attemptId, List<QuizAnswerSubmission> answers) {
+	public QuizAttempt submitQuiz(Long attemptId, List<SubmitQuizRequest.QuizAnswerSubmission> answers) {
 		QuizAttempt attempt = attemptRepository.findById(attemptId)
 			.orElseThrow(() -> new ResourceNotFoundException("Quiz attempt not found"));
 
@@ -76,7 +77,7 @@ public class QuizService {
 		for (Question question : questions) {
 			totalPoints += question.getPoints() != null ? question.getPoints() : 1;
 
-			QuizAnswerSubmission submission = answers.stream()
+			SubmitQuizRequest.QuizAnswerSubmission submission = answers.stream()
 				.filter(a -> a.getQuestionId() != null && a.getQuestionId().equals(question.getId()))
 				.findFirst()
 				.orElse(null);
@@ -107,7 +108,7 @@ public class QuizService {
 	 * Create and grade a single answer
 	 */
 	private QuizAnswer createAnswer(QuizAttempt attempt, Question question, 
-		QuizAnswerSubmission submission) {
+		SubmitQuizRequest.QuizAnswerSubmission submission) {
 		QuizAnswer answer = new QuizAnswer();
 		answer.setAttempt(attempt);
 		answer.setQuestion(question);
@@ -175,27 +176,5 @@ public class QuizService {
 	 */
 	public List<QuizAttempt> getQuizResults(Long quizId, Long studentId) {
 		return attemptRepository.findByStudentIdAndQuizId(studentId, quizId);
-	}
-
-	// Inner class for answer submission
-	public static class QuizAnswerSubmission {
-		private Long questionId;
-		private Set<Long> selectedOptionIds = new HashSet<>();
-
-		public Long getQuestionId() {
-			return questionId;
-		}
-
-		public void setQuestionId(Long questionId) {
-			this.questionId = questionId;
-		}
-
-		public Set<Long> getSelectedOptionIds() {
-			return selectedOptionIds;
-		}
-
-		public void setSelectedOptionIds(Set<Long> selectedOptionIds) {
-			this.selectedOptionIds = selectedOptionIds;
-		}
 	}
 }
