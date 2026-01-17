@@ -23,6 +23,7 @@ public class QuizService {
 	private final QuizRepository quizRepository;
 	private final QuizAttemptRepository attemptRepository;
 	private final EnrollmentRepository enrollmentRepository;
+	private final UserRepository userRepository;
 	private final NotificationService notificationService;
 
 	/**
@@ -32,6 +33,14 @@ public class QuizService {
 	public QuizAttempt startQuizAttempt(Long quizId, Long studentId) {
 		Quiz quiz = quizRepository.findById(quizId)
 			.orElseThrow(() -> new ResourceNotFoundException("Quiz not found"));
+
+		// Bug #3 Fix: Add null check for quiz.getLesson()
+		if (quiz.getLesson() == null) {
+			throw new IllegalStateException("Quiz is not associated with a lesson");
+		}
+		if (quiz.getLesson().getCourse() == null) {
+			throw new IllegalStateException("Lesson is not associated with a course");
+		}
 
 		// Check if student is enrolled in the course
 		if (!enrollmentRepository.existsByStudentIdAndCourseId(
@@ -47,9 +56,11 @@ public class QuizService {
 			}
 		}
 
+		// Bug #4 & #5 Fix: Load User from repository instead of creating transient object
+		User student = userRepository.findById(studentId)
+			.orElseThrow(() -> new ResourceNotFoundException("Student not found"));
+
 		QuizAttempt attempt = new QuizAttempt();
-		User student = new User();
-		student.setId(studentId);
 		attempt.setStudent(student);
 		attempt.setQuiz(quiz);
 		attempt.setStartedAt(LocalDateTime.now());
@@ -128,18 +139,22 @@ public class QuizService {
 		answer.setAttempt(attempt);
 		answer.setQuestion(question);
 
-		Set<QuestionOption> selectedOptions = submission.getSelectedOptionIds().stream()
-			.map(optionId -> {
-				if (question.getOptions() == null) {
-					return null;
-				}
-				return question.getOptions().stream()
-					.filter(opt -> opt.getId() != null && opt.getId().equals(optionId))
-					.findFirst()
-					.orElse(null);
-			})
-			.filter(opt -> opt != null)
-			.collect(Collectors.toSet());
+		// Bug #10 Fix: Add null check for selectedOptionIds
+		Set<QuestionOption> selectedOptions = new HashSet<>();
+		if (submission.getSelectedOptionIds() != null) {
+			selectedOptions = submission.getSelectedOptionIds().stream()
+				.map(optionId -> {
+					if (question.getOptions() == null) {
+						return null;
+					}
+					return question.getOptions().stream()
+						.filter(opt -> opt.getId() != null && opt.getId().equals(optionId))
+						.findFirst()
+						.orElse(null);
+				})
+				.filter(opt -> opt != null)
+				.collect(Collectors.toSet());
+		}
 
 		answer.setSelectedOptions(selectedOptions);
 
