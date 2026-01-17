@@ -45,7 +45,7 @@ public class CertificateService {
 			request.getStudentId(), request.getCourseId())
 			.orElseThrow(() -> new IllegalStateException("Student is not enrolled in this course"));
 		
-		if (!enrollment.isCompleted()) {
+		if (enrollment.getProgress() == null || enrollment.getProgress() < 100) {
 			throw new IllegalStateException("Student has not completed the course yet");
 		}
 		
@@ -68,8 +68,7 @@ public class CertificateService {
 		certificate.setCourse(course);
 		certificate.setCertificateCode(certificateCode);
 		certificate.setPdfUrl(pdfUrl);
-		certificate.setCompletionDate(enrollment.getCompletedAt() != null ? 
-			enrollment.getCompletedAt() : LocalDateTime.now());
+		certificate.setCompletionDate(LocalDateTime.now());
 		
 		Certificate savedCertificate = certificateRepository.save(certificate);
 		
