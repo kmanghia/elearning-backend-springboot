@@ -35,6 +35,11 @@ public class CourseController {
 	public ResponseEntity<List<CourseResponse>> getCoursesByInstructor(@PathVariable Long instructorId) {
 		return ResponseEntity.ok(courseService.getCoursesByInstructor(instructorId));
 	}
+	
+	@GetMapping("/category/{categoryId}")
+	public ResponseEntity<List<CourseResponse>> getCoursesByCategory(@PathVariable Long categoryId) {
+		return ResponseEntity.ok(courseService.getCoursesByCategory(categoryId));
+	}
 
 	@PostMapping
 	@PreAuthorize("hasAnyRole('INSTRUCTOR', 'ADMIN')")

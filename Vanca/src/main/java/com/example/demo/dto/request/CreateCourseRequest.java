@@ -20,6 +20,8 @@ public class CreateCourseRequest {
 	private BigDecimal price;
 
 	private String thumbnailUrl;
+	
+	private Long categoryId;
 
 	private Course.Status status = Course.Status.DRAFT;
 }

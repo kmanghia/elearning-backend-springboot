@@ -24,6 +24,8 @@ public class CourseResponse {
 	private Course.Status status;
 	private LocalDateTime createdAt;
 	private LocalDateTime updatedAt;
+	private Long categoryId;
+	private String categoryName;
 	private Integer lessonCount;
 	private Integer enrolledStudentCount;
 }

@@ -4,8 +4,10 @@ import com.example.demo.dto.request.CreateCourseRequest;
 import com.example.demo.dto.response.CourseResponse;
 import com.example.demo.exception.ResourceNotFoundException;
 import com.example.demo.exception.UnauthorizedException;
+import com.example.demo.model.Category;
 import com.example.demo.model.Course;
 import com.example.demo.model.User;
+import com.example.demo.repository.CategoryRepository;
 import com.example.demo.repository.CourseRepository;
 import com.example.demo.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +23,7 @@ public class CourseService {
 
 	private final CourseRepository courseRepository;
 	private final UserRepository userRepository;
+	private final CategoryRepository categoryRepository;
 
 	public List<CourseResponse> getAllPublishedCourses() {
 		return courseRepository.findPublishedCourses(Course.Status.PUBLISHED)
@@ -56,6 +59,13 @@ public class CourseService {
 		course.setPrice(request.getPrice());
 		course.setThumbnailUrl(request.getThumbnailUrl());
 		course.setStatus(request.getStatus());
+		
+		// Assign category if provided
+		if (request.getCategoryId() != null) {
+			Category category = categoryRepository.findById(request.getCategoryId())
+				.orElseThrow(() -> new ResourceNotFoundException("Category not found"));
+			course.setCategory(category);
+		}
 
 		course = courseRepository.save(course);
 		return mapToResponse(course);
@@ -89,6 +99,11 @@ public class CourseService {
 		if (request.getStatus() != null) {
 			course.setStatus(request.getStatus());
 		}
+		if (request.getCategoryId() != null) {
+			Category category = categoryRepository.findById(request.getCategoryId())
+				.orElseThrow(() -> new ResourceNotFoundException("Category not found"));
+			course.setCategory(category);
+		}
 
 		course = courseRepository.save(course);
 		return mapToResponse(course);
@@ -106,6 +121,17 @@ public class CourseService {
 
 		courseRepository.delete(course);
 	}
+	
+	public List<CourseResponse> getCoursesByCategory(Long categoryId) {
+		// Verify category exists
+		categoryRepository.findById(categoryId)
+			.orElseThrow(() -> new ResourceNotFoundException("Category not found"));
+		
+		List<Course> courses = courseRepository.findByCategoryId(categoryId);
+		return courses.stream()
+			.map(this::mapToResponse)
+			.collect(Collectors.toList());
+	}
 
 	private CourseResponse mapToResponse(Course course) {
 		return CourseResponse.builder()
@@ -119,6 +145,8 @@ public class CourseService {
 			.status(course.getStatus())
 			.createdAt(course.getCreatedAt())
 			.updatedAt(course.getUpdatedAt())
+			.categoryId(course.getCategory() != null ? course.getCategory().getId() : null)
+			.categoryName(course.getCategory() != null ? course.getCategory().getName() : null)
 			.lessonCount(course.getLessons() != null ? course.getLessons().size() : 0)
 			.enrolledStudentCount(course.getEnrolledStudents() != null ? 
 				course.getEnrolledStudents().size() : 0)

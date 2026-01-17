@@ -44,6 +44,10 @@ public class Course {
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = false)
 	private Status status = Status.DRAFT;
+	
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "category_id")
+	private Category category;
 
 	@CreationTimestamp
 	@Column(name = "created_at", nullable = false, updatable = false)
