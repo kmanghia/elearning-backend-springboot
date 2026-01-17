@@ -10,20 +10,26 @@ import com.example.demo.model.User;
 import com.example.demo.repository.CourseRepository;
 import com.example.demo.repository.EnrollmentRepository;
 import com.example.demo.repository.UserRepository;
-import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@RequiredArgsConstructor
 public class EnrollmentService {
 
 	private final EnrollmentRepository enrollmentRepository;
 	private final CourseRepository courseRepository;
 	private final UserRepository userRepository;
 	private final NotificationService notificationService;
+
+
+	public EnrollmentService(EnrollmentRepository enrollmentRepository, CourseRepository courseRepository, UserRepository userRepository, NotificationService notificationService) {
+		this.enrollmentRepository = enrollmentRepository;
+		this.courseRepository = courseRepository;
+		this.userRepository = userRepository;
+		this.notificationService = notificationService;
+	}
 
 	@Transactional
 	public EnrollmentResponse enrollInCourse(Long courseId, Long studentId) {
@@ -33,6 +39,13 @@ public class EnrollmentService {
 		// Bug #6 Fix: Add null check for course.getStatus()
 		if (course.getStatus() == null || course.getStatus() != Course.Status.PUBLISHED) {
 			throw new BadRequestException("Course is not published");
+		}
+
+		// Check if course requires payment
+		if (course.getPrice() != null && course.getPrice().compareTo(java.math.BigDecimal.ZERO) > 0) {
+			throw new BadRequestException(
+				"This is a paid course. Please complete payment via POST /api/payments/create-intent/" + courseId
+			);
 		}
 
 		// Bug #7 Fix: Prevent instructor from enrolling in their own course
