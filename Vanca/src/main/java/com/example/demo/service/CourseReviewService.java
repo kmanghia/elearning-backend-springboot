@@ -13,7 +13,6 @@ import com.example.demo.repository.CourseRepository;
 import com.example.demo.repository.CourseReviewRepository;
 import com.example.demo.repository.EnrollmentRepository;
 import com.example.demo.repository.UserRepository;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,13 +23,20 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
-@RequiredArgsConstructor
 public class CourseReviewService {
 	
 	private final CourseReviewRepository courseReviewRepository;
 	private final UserRepository userRepository;
 	private final CourseRepository courseRepository;
 	private final EnrollmentRepository enrollmentRepository;
+
+
+	public CourseReviewService(CourseReviewRepository courseReviewRepository, UserRepository userRepository, CourseRepository courseRepository, EnrollmentRepository enrollmentRepository) {
+		this.courseReviewRepository = courseReviewRepository;
+		this.userRepository = userRepository;
+		this.courseRepository = courseRepository;
+		this.enrollmentRepository = enrollmentRepository;
+	}
 	
 	@Transactional
 	public ReviewResponse createReview(Long userId, CreateReviewRequest request) {
