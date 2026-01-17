@@ -7,7 +7,6 @@ import com.example.demo.dto.response.ProgressResponse;
 import com.example.demo.model.Progress;
 import com.example.demo.security.UserPrincipal;
 import com.example.demo.service.ProgressService;
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -18,10 +17,14 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/progress")
-@RequiredArgsConstructor
 public class ProgressController {
 
 	private final ProgressService progressService;
+
+
+	public ProgressController(ProgressService progressService) {
+		this.progressService = progressService;
+	}
 
 	@GetMapping("/courses/{courseId}")
 	@PreAuthorize("hasAnyRole('STUDENT', 'INSTRUCTOR', 'ADMIN')")
