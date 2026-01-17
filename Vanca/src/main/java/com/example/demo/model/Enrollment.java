@@ -8,8 +8,6 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.Set;
 
 @Entity
 @Table(name = "enrollments", uniqueConstraints = {
@@ -39,16 +37,9 @@ public class Enrollment {
 	@Column(nullable = false)
 	private Integer progress = 0; // Percentage 0-100
 
-	@ManyToMany
-	@JoinTable(
-		name = "completed_lessons",
-		joinColumns = @JoinColumn(name = "enrollment_id"),
-		inverseJoinColumns = @JoinColumn(name = "lesson_id")
-	)
-	private Set<Lesson> completedLessons = new HashSet<>();
-
 	@UpdateTimestamp
 	@Column(name = "last_accessed_at")
 	private LocalDateTime lastAccessedAt;
 }
+
 
