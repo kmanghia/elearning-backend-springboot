@@ -170,6 +170,12 @@ public class ForumService {
 		if (request.getParentCommentId() != null) {
 			Comment parentComment = commentRepository.findById(request.getParentCommentId())
 					.orElseThrow(() -> new RuntimeException("Parent comment not found"));
+			
+			// Validate parent comment belongs to the same post
+			if (!parentComment.getPost().getId().equals(post.getId())) {
+				throw new RuntimeException("Parent comment must belong to the same post");
+			}
+			
 			comment.setParentComment(parentComment);
 		}
 
@@ -233,18 +239,27 @@ public class ForumService {
 			throw new RuntimeException("Only the post author can mark an answer as accepted");
 		}
 
-		// Unmark any previously accepted answer
-		commentRepository.findAcceptedAnswerByPostId(post.getId()).ifPresent(previousAnswer -> {
-			previousAnswer.setIsAcceptedAnswer(false);
-			commentRepository.save(previousAnswer);
-		});
+		// Toggle behavior: if already accepted, unmark it
+		if (comment.getIsAcceptedAnswer()) {
+			comment.setIsAcceptedAnswer(false);
+			post.setIsResolved(false);
+		} else {
+			// Unmark any previously accepted answer (different from this one)
+			commentRepository.findAcceptedAnswerByPostId(post.getId())
+					.filter(previousAnswer -> !previousAnswer.getId().equals(commentId))
+					.ifPresent(previousAnswer -> {
+						previousAnswer.setIsAcceptedAnswer(false);
+						commentRepository.save(previousAnswer);
+					});
 
-		// Mark this comment as accepted
-		comment.setIsAcceptedAnswer(true);
+			// Mark this comment as accepted
+			comment.setIsAcceptedAnswer(true);
+			
+			// Mark post as resolved
+			post.setIsResolved(true);
+		}
+		
 		Comment updatedComment = commentRepository.save(comment);
-
-		// Mark post as resolved
-		post.setIsResolved(true);
 		postRepository.save(post);
 
 		return mapToCommentResponse(updatedComment);
@@ -253,6 +268,14 @@ public class ForumService {
 	// ==================== VOTE OPERATIONS ====================
 
 	public void votePost(Long postId, CreateVoteRequest request, Long userId) {
+		// Validate vote target
+		if (request.getPostId() == null && request.getCommentId() == null) {
+			throw new RuntimeException("Must vote on either a post or comment");
+		}
+		if (request.getPostId() != null && request.getCommentId() != null) {
+			throw new RuntimeException("Cannot vote on both post and comment simultaneously");
+		}
+		
 		User user = userRepository.findById(userId)
 				.orElseThrow(() -> new RuntimeException("User not found"));
 
@@ -287,6 +310,14 @@ public class ForumService {
 	}
 
 	public void voteComment(Long commentId, CreateVoteRequest request, Long userId) {
+		// Validate vote target
+		if (request.getPostId() == null && request.getCommentId() == null) {
+			throw new RuntimeException("Must vote on either a post or comment");
+		}
+		if (request.getPostId() != null && request.getCommentId() != null) {
+			throw new RuntimeException("Cannot vote on both post and comment simultaneously");
+		}
+		
 		User user = userRepository.findById(userId)
 				.orElseThrow(() -> new RuntimeException("User not found"));
 
