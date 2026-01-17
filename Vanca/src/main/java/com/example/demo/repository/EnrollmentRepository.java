@@ -1,6 +1,8 @@
 package com.example.demo.repository;
 
 import com.example.demo.model.Enrollment;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -14,6 +16,6 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
 	boolean existsByStudentIdAndCourseId(Long studentId, Long courseId);
 	
 	@Query("SELECT e FROM Enrollment e WHERE e.student.id = :studentId")
-	java.util.List<Enrollment> findByStudentId(@Param("studentId") Long studentId);
+	Page<Enrollment> findByStudentId(@Param("studentId") Long studentId, Pageable pageable);
 }
 
