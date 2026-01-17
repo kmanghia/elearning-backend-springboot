@@ -12,6 +12,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -75,11 +77,10 @@ public class CourseReviewController {
 	}
 	
 	@GetMapping("/course/{courseId}")
-	@Operation(summary = "Get reviews by course", description = "Get all reviews for a specific course with pagination")
-	public ResponseEntity<Page<CourseReviewResponse>> getReviewsByCourse(
-		@PathVariable Long courseId,
-		Pageable pageable) { 
-		Page<CourseReviewResponse> reviews = courseReviewService.getReviewsByCourse(courseId, pageable);
+	@Operation(summary = "Get reviews by course", description = "Get all reviews for a specific course")
+	public ResponseEntity<List<ReviewResponse>> getCourseReviews(
+		@PathVariable Long courseId) { 
+		List<ReviewResponse> reviews = courseReviewService.getCourseReviews(courseId);
 		return ResponseEntity.ok(reviews);
 	}
 	
