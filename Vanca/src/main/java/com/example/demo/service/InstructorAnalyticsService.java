@@ -81,7 +81,7 @@ public class InstructorAnalyticsService {
         // Total quiz attempts
         int totalQuizAttempts = (int) quizAttemptRepository.findAll().stream()
                 .filter(attempt -> instructorCourses.stream()
-                        .anyMatch(course -> course.getId().equals(attempt.getQuiz().getCourse().getId())))
+                        .anyMatch(course -> course.getId().equals(attempt.getQuiz().getLesson().getCourse().getId())))
                 .count();
         
         // Get course performances
