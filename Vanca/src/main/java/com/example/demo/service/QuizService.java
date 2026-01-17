@@ -6,7 +6,6 @@ import com.example.demo.exception.ResourceNotFoundException;
 import com.example.demo.model.*;
 import com.example.demo.model.Notification.NotificationType;
 import com.example.demo.repository.*;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,7 +16,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
-@RequiredArgsConstructor
 public class QuizService {
 
 	private final QuizRepository quizRepository;
@@ -25,6 +23,15 @@ public class QuizService {
 	private final EnrollmentRepository enrollmentRepository;
 	private final UserRepository userRepository;
 	private final NotificationService notificationService;
+
+
+	public QuizService(QuizRepository quizRepository, QuizAttemptRepository attemptRepository, EnrollmentRepository enrollmentRepository, UserRepository userRepository, NotificationService notificationService) {
+		this.quizRepository = quizRepository;
+		this.attemptRepository = attemptRepository;
+		this.enrollmentRepository = enrollmentRepository;
+		this.userRepository = userRepository;
+		this.notificationService = notificationService;
+	}
 
 	/**
 	 * Start a new quiz attempt
