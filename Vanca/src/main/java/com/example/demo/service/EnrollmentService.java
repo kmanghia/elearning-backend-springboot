@@ -1,5 +1,6 @@
 package com.example.demo.service;
 
+import com.example.demo.dto.response.EnrollmentResponse;
 import com.example.demo.exception.BadRequestException;
 import com.example.demo.exception.ResourceNotFoundException;
 import com.example.demo.model.Course;
@@ -10,6 +11,8 @@ import com.example.demo.repository.CourseRepository;
 import com.example.demo.repository.EnrollmentRepository;
 import com.example.demo.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,7 +26,7 @@ public class EnrollmentService {
 	private final NotificationService notificationService;
 
 	@Transactional
-	public Enrollment enrollInCourse(Long courseId, Long studentId) {
+	public EnrollmentResponse enrollInCourse(Long courseId, Long studentId) {
 		Course course = courseRepository.findById(courseId)
 			.orElseThrow(() -> new ResourceNotFoundException("Course not found"));
 
@@ -55,7 +58,7 @@ public class EnrollmentService {
 			course.getId()
 		);
 
-		return savedEnrollment;
+		return mapToResponse(savedEnrollment);
 	}
 
 	@Transactional
@@ -70,5 +73,23 @@ public class EnrollmentService {
 	public boolean isEnrolled(Long courseId, Long studentId) {
 		return enrollmentRepository.existsByStudentIdAndCourseId(studentId, courseId);
 	}
+
+	public Page<EnrollmentResponse> getMyEnrollments(Long studentId, Pageable pageable) {
+		Page<Enrollment> enrollments = enrollmentRepository.findByStudentId(studentId, pageable);
+		return enrollments.map(this::mapToResponse);
+	}
+
+	private EnrollmentResponse mapToResponse(Enrollment enrollment) {
+		return EnrollmentResponse.builder()
+			.id(enrollment.getId())
+			.courseId(enrollment.getCourse().getId())
+			.courseName(enrollment.getCourse().getTitle())
+			.studentId(enrollment.getStudent().getId())
+			.studentName(enrollment.getStudent().getFullName())
+			.enrolledAt(enrollment.getEnrolledAt())
+			.progress(enrollment.getProgress())
+			.build();
+	}
 }
+
 
