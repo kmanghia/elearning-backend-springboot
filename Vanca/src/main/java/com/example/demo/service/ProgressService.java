@@ -1,5 +1,6 @@
 package com.example.demo.service;
 
+import com.example.demo.dto.response.CourseProgressResponse;
 import com.example.demo.exception.ResourceNotFoundException;
 import com.example.demo.model.Enrollment;
 import com.example.demo.model.Lesson;
@@ -12,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -64,7 +66,7 @@ public class ProgressService {
 	/**
 	 * Get course progress for a student
 	 */
-	public CourseProgressDTO getCourseProgress(Long courseId, Long studentId) {
+	public CourseProgressResponse getCourseProgress(Long courseId, Long studentId) {
 		List<Progress> progressList = progressRepository
 			.findByStudentIdAndCourseId(studentId, courseId);
 
@@ -80,13 +82,24 @@ public class ProgressService {
 			? (int) ((completedLessons * 100) / totalLessons) 
 			: 0;
 
-		return new CourseProgressDTO(
-			courseId,
-			totalLessons,
-			(int) completedLessons,
-			courseProgress,
-			progressList
-		);
+		// Map Progress entities to LessonProgressResponse DTOs
+		List<CourseProgressResponse.LessonProgressResponse> lessonProgressDtos = progressList.stream()
+			.map(p -> CourseProgressResponse.LessonProgressResponse.builder()
+				.lessonId(p.getLesson().getId())
+				.lessonTitle(p.getLesson().getTitle())
+				.watchedDurationSeconds(p.getWatchedDurationSeconds())
+				.completionPercentage(p.getCompletionPercentage())
+				.isCompleted(p.getIsCompleted())
+				.build())
+			.collect(Collectors.toList());
+
+		return CourseProgressResponse.builder()
+			.courseId(courseId)
+			.totalLessons(totalLessons)
+			.completedLessons((int) completedLessons)
+			.courseProgress(courseProgress)
+			.lessonProgress(lessonProgressDtos)
+			.build();
 	}
 
 	/**
@@ -99,35 +112,10 @@ public class ProgressService {
 			.orElse(null);
 
 		if (enrollment != null) {
-			CourseProgressDTO courseProgress = getCourseProgress(courseId, studentId);
+			CourseProgressResponse courseProgress = getCourseProgress(courseId, studentId);
 			enrollment.setProgress(courseProgress.getCourseProgress());
 			enrollmentRepository.save(enrollment);
 		}
-	}
-
-	// DTO for course progress
-	public static class CourseProgressDTO {
-		private Long courseId;
-		private int totalLessons;
-		private int completedLessons;
-		private int courseProgress; // Percentage
-		private List<Progress> lessonProgress;
-
-		public CourseProgressDTO(Long courseId, int totalLessons, int completedLessons, 
-			int courseProgress, List<Progress> lessonProgress) {
-			this.courseId = courseId;
-			this.totalLessons = totalLessons;
-			this.completedLessons = completedLessons;
-			this.courseProgress = courseProgress;
-			this.lessonProgress = lessonProgress;
-		}
-
-		// Getters
-		public Long getCourseId() { return courseId; }
-		public int getTotalLessons() { return totalLessons; }
-		public int getCompletedLessons() { return completedLessons; }
-		public int getCourseProgress() { return courseProgress; }
-		public List<Progress> getLessonProgress() { return lessonProgress != null ? lessonProgress : List.of(); }
 	}
 }
 
