@@ -1,8 +1,6 @@
 package com.example.demo.security;
 
 import com.example.demo.model.User;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -10,8 +8,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.util.Collection;
 import java.util.Collections;
 
-@Getter
-@AllArgsConstructor
 public class UserPrincipal implements UserDetails {
 
 	private Long id;
@@ -20,14 +16,21 @@ public class UserPrincipal implements UserDetails {
 	private User.Role role;
 	private boolean enabled;
 
+	public UserPrincipal(Long id, String email, String password, User.Role role, boolean enabled) {
+		this.id = id;
+		this.email = email;
+		this.password = password;
+		this.role = role;
+		this.enabled = enabled;
+	}
+
 	public static UserPrincipal create(User user) {
 		return new UserPrincipal(
-			user.getId(),
-			user.getEmail(),
-			user.getPassword(),
-			user.getRole(),
-			user.getEnabled()
-		);
+				user.getId(),
+				user.getEmail(),
+				user.getPassword(),
+				user.getRole(),
+				user.getEnabled());
 	}
 
 	@Override
@@ -64,5 +67,17 @@ public class UserPrincipal implements UserDetails {
 	public boolean isEnabled() {
 		return enabled;
 	}
-}
 
+	// Manual getters for fields
+	public Long getId() {
+		return id;
+	}
+
+	public String getEmail() {
+		return email;
+	}
+
+	public User.Role getRole() {
+		return role;
+	}
+}
