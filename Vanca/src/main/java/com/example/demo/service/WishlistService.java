@@ -10,20 +10,26 @@ import com.example.demo.repository.CourseRepository;
 import com.example.demo.repository.EnrollmentRepository;
 import com.example.demo.repository.UserRepository;
 import com.example.demo.repository.WishlistRepository;
-import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@RequiredArgsConstructor
 public class WishlistService {
 
 	private final WishlistRepository wishlistRepository;
 	private final UserRepository userRepository;
 	private final CourseRepository courseRepository;
 	private final EnrollmentRepository enrollmentRepository;
+
+
+	public WishlistService(WishlistRepository wishlistRepository, UserRepository userRepository, CourseRepository courseRepository, EnrollmentRepository enrollmentRepository) {
+		this.wishlistRepository = wishlistRepository;
+		this.userRepository = userRepository;
+		this.courseRepository = courseRepository;
+		this.enrollmentRepository = enrollmentRepository;
+	}
 
 	@Transactional
 	public WishlistResponse addToWishlist(Long userId, Long courseId) {
