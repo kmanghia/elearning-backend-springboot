@@ -1,20 +1,14 @@
 package com.example.demo.model;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "progress", uniqueConstraints = {
-	@UniqueConstraint(columnNames = {"student_id", "lesson_id"})
+		@UniqueConstraint(columnNames = { "student_id", "lesson_id" })
 })
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
 public class Progress {
 
 	@Id
@@ -41,5 +35,76 @@ public class Progress {
 	@UpdateTimestamp
 	@Column(name = "last_watched_at")
 	private LocalDateTime lastWatchedAt;
-}
 
+	// Constructors
+	public Progress() {
+	}
+
+	public Progress(Long id, User student, Lesson lesson, Integer watchedDurationSeconds, Boolean isCompleted,
+			Integer completionPercentage, LocalDateTime lastWatchedAt) {
+		this.id = id;
+		this.student = student;
+		this.lesson = lesson;
+		this.watchedDurationSeconds = watchedDurationSeconds;
+		this.isCompleted = isCompleted;
+		this.completionPercentage = completionPercentage;
+		this.lastWatchedAt = lastWatchedAt;
+	}
+
+	// Getters and Setters
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	public User getStudent() {
+		return student;
+	}
+
+	public void setStudent(User student) {
+		this.student = student;
+	}
+
+	public Lesson getLesson() {
+		return lesson;
+	}
+
+	public void setLesson(Lesson lesson) {
+		this.lesson = lesson;
+	}
+
+	public Integer getWatchedDurationSeconds() {
+		return watchedDurationSeconds;
+	}
+
+	public void setWatchedDurationSeconds(Integer watchedDurationSeconds) {
+		this.watchedDurationSeconds = watchedDurationSeconds;
+	}
+
+	public Boolean getIsCompleted() {
+		return isCompleted;
+	}
+
+	public void setIsCompleted(Boolean isCompleted) {
+		this.isCompleted = isCompleted;
+	}
+
+	public Integer getCompletionPercentage() {
+		return completionPercentage;
+	}
+
+	public void setCompletionPercentage(Integer completionPercentage) {
+		this.completionPercentage = completionPercentage;
+	}
+
+	public LocalDateTime getLastWatchedAt() {
+		return lastWatchedAt;
+	}
+
+	public void setLastWatchedAt(LocalDateTime lastWatchedAt) {
+		this.lastWatchedAt = lastWatchedAt;
+	}
+}
