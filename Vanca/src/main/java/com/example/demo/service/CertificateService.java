@@ -113,6 +113,25 @@ public class CertificateService {
 		return mapToResponse(certificate);
 	}
 	
+	public byte[] downloadCertificatePDF(Long certificateId) {
+		Certificate certificate = certificateRepository.findById(certificateId)
+			.orElseThrow(() -> new ResourceNotFoundException("Certificate not found"));
+		
+		try {
+			String verificationUrl = "https://elearning.com/verify/" + certificate.getCertificateCode();
+			
+			return com.example.demo.util.CertificateTemplate.generateCertificatePDF(
+				certificate.getCertificateCode(),
+				certificate.getStudent().getFullName(),
+				certificate.getCourse().getTitle(),
+				certificate.getIssuedAt().format(java.time.format.DateTimeFormatter.ofPattern("MMMM dd, yyyy")),
+				verificationUrl
+			);
+		} catch (Exception e) {
+			throw new RuntimeException("Failed to generate PDF certificate", e);
+		}
+	}
+	
 	private String generateUniqueCertificateCode() {
 		String code;
 		do {
