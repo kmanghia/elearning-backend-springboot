@@ -1,6 +1,7 @@
 package com.example.demo.controller;
 
 import com.example.demo.dto.request.UpdateProgressRequest;
+import com.example.demo.dto.response.CourseProgressResponse;
 import com.example.demo.dto.response.LessonProgressResponse;
 import com.example.demo.dto.response.ProgressResponse;
 import com.example.demo.model.Progress;
@@ -27,7 +28,7 @@ public class ProgressController {
 	public ResponseEntity<ProgressResponse> getCourseProgress(
 		@PathVariable Long courseId,
 		@AuthenticationPrincipal UserPrincipal userPrincipal) {
-		var courseProgress = progressService.getCourseProgress(courseId, userPrincipal.getId());
+		CourseProgressResponse courseProgress = progressService.getCourseProgress(courseId, userPrincipal.getId());
 		return ResponseEntity.ok(mapToResponse(courseProgress));
 	}
 
@@ -42,10 +43,16 @@ public class ProgressController {
 		return ResponseEntity.ok(mapLessonProgressToResponse(progress));
 	}
 
-	private ProgressResponse mapToResponse(ProgressService.CourseProgressDTO dto) {
+	private ProgressResponse mapToResponse(CourseProgressResponse dto) {
 		List<LessonProgressResponse> lessonProgress = dto.getLessonProgress() != null
 			? dto.getLessonProgress().stream()
-				.map(this::mapLessonProgressToResponse)
+				.map(lp -> LessonProgressResponse.builder()
+					.lessonId(lp.getLessonId())
+					.lessonTitle(lp.getLessonTitle())
+					.watchedDurationSeconds(lp.getWatchedDurationSeconds())
+					.completionPercentage(lp.getCompletionPercentage())
+					.isCompleted(lp.getIsCompleted())
+					.build())
 				.collect(Collectors.toList())
 			: List.of();
 
