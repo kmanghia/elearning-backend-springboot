@@ -9,6 +9,8 @@ import com.example.demo.model.Course;
 import com.example.demo.model.User;
 import com.example.demo.repository.CategoryRepository;
 import com.example.demo.repository.CourseRepository;
+import com.example.demo.repository.EnrollmentRepository;
+import com.example.demo.repository.LessonRepository;
 import com.example.demo.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -26,6 +28,9 @@ public class CourseService {
 	private final CourseRepository courseRepository;
 	private final UserRepository userRepository;
 	private final CategoryRepository categoryRepository;
+	// Bug #2 Fix: Add repositories for count queries to avoid N+1
+	private final LessonRepository lessonRepository;
+	private final EnrollmentRepository enrollmentRepository;
 
 	public Page<CourseResponse> getAllPublishedCourses(Pageable pageable) {
 		Page<Course> courses = courseRepository.findByStatus(Course.Status.PUBLISHED, pageable);
@@ -147,9 +152,9 @@ public class CourseService {
 			.updatedAt(course.getUpdatedAt())
 			.categoryId(course.getCategory() != null ? course.getCategory().getId() : null)
 			.categoryName(course.getCategory() != null ? course.getCategory().getName() : null)
-			.lessonCount(course.getLessons() != null ? course.getLessons().size() : 0)
-			.enrolledStudentCount(course.getEnrolledStudents() != null ? 
-				course.getEnrolledStudents().size() : 0)
+			// Bug #2 Fix: Use count queries instead of accessing lazy collections
+			.lessonCount(lessonRepository.countByCourseId(course.getId()).intValue())
+			.enrolledStudentCount(enrollmentRepository.countByCourseId(course.getId()).intValue())
 			.build();
 	}
 }

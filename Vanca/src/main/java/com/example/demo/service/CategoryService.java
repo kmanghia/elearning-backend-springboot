@@ -126,7 +126,8 @@ public class CategoryService {
 	}
 	
 	private CategoryResponse mapToResponse(Category category) {
-		Long subcategoryCount = (long) categoryRepository.findByParentId(category.getId()).size();
+		// Bug #1 Fix: Use count query instead of loading list
+		Long subcategoryCount = categoryRepository.countByParentId(category.getId());
 		Long courseCount = courseRepository.countByCategoryId(category.getId());
 		
 		return CategoryResponse.builder()
@@ -137,7 +138,7 @@ public class CategoryService {
 			.parentId(category.getParent() != null ? category.getParent().getId() : null)
 			.parentName(category.getParent() != null ? category.getParent().getName() : null)
 			.iconUrl(category.getIconUrl())
-			.subcategoryCount(subcategoryCount)
+			.subcategoryCount(subcategoryCount != null ? subcategoryCount : 0L)
 			.courseCount(courseCount != null ? courseCount : 0L)
 			.createdAt(category.getCreatedAt())
 			.build();
