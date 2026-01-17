@@ -1,26 +1,17 @@
 package com.example.demo.model;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "course_reviews", 
-	uniqueConstraints = {
-		@UniqueConstraint(columnNames = {"student_id", "course_id"})
-	},
-	indexes = {
+@Table(name = "course_reviews", uniqueConstraints = {
+		@UniqueConstraint(columnNames = { "student_id", "course_id" })
+}, indexes = {
 		@Index(name = "idx_review_course_id", columnList = "course_id"),
 		@Index(name = "idx_review_student_id", columnList = "student_id")
-	}
-)
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
+})
 public class CourseReview {
 
 	@Id
@@ -47,4 +38,76 @@ public class CourseReview {
 
 	@Column(name = "updated_at")
 	private LocalDateTime updatedAt;
+
+	// Constructors
+	public CourseReview() {
+	}
+
+	public CourseReview(Long id, User student, Course course, Integer rating, String comment,
+			LocalDateTime createdAt, LocalDateTime updatedAt) {
+		this.id = id;
+		this.student = student;
+		this.course = course;
+		this.rating = rating;
+		this.comment = comment;
+		this.createdAt = createdAt;
+		this.updatedAt = updatedAt;
+	}
+
+	// Getters and Setters
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	public User getStudent() {
+		return student;
+	}
+
+	public void setStudent(User student) {
+		this.student = student;
+	}
+
+	public Course getCourse() {
+		return course;
+	}
+
+	public void setCourse(Course course) {
+		this.course = course;
+	}
+
+	public Integer getRating() {
+		return rating;
+	}
+
+	public void setRating(Integer rating) {
+		this.rating = rating;
+	}
+
+	public String getComment() {
+		return comment;
+	}
+
+	public void setComment(String comment) {
+		this.comment = comment;
+	}
+
+	public LocalDateTime getCreatedAt() {
+		return createdAt;
+	}
+
+	public void setCreatedAt(LocalDateTime createdAt) {
+		this.createdAt = createdAt;
+	}
+
+	public LocalDateTime getUpdatedAt() {
+		return updatedAt;
+	}
+
+	public void setUpdatedAt(LocalDateTime updatedAt) {
+		this.updatedAt = updatedAt;
+	}
 }
