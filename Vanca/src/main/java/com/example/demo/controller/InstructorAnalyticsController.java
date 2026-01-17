@@ -7,7 +7,6 @@ import com.example.demo.security.UserPrincipal;
 import com.example.demo.service.InstructorAnalyticsService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -15,11 +14,15 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/instructor/analytics")
-@RequiredArgsConstructor
 @Tag(name = "Instructor Analytics", description = "Analytics dashboard for instructors")
 public class InstructorAnalyticsController {
     
     private final InstructorAnalyticsService analyticsService;
+
+
+	public InstructorAnalyticsController(InstructorAnalyticsService analyticsService) {
+		this.analyticsService = analyticsService;
+	}
     
     @GetMapping("/dashboard")
     @PreAuthorize("hasAnyRole('INSTRUCTOR', 'ADMIN')")
