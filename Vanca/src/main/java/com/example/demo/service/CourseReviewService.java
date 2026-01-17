@@ -118,10 +118,12 @@ public class CourseReviewService {
 			ratingDistribution.put(i, 0L);
 		}
 		
-		// Count reviews by rating
+		// Count reviews by rating - Bug #14 Fix: Add null check for rating
 		reviews.forEach(review -> {
 			Integer rating = review.getRating();
-			ratingDistribution.put(rating, ratingDistribution.get(rating) + 1);
+			if (rating != null && rating >= 1 && rating <= 5) {
+				ratingDistribution.put(rating, ratingDistribution.get(rating) + 1);
+			}
 		});
 		
 		return CourseRatingResponse.builder()
