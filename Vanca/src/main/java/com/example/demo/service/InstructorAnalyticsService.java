@@ -194,7 +194,7 @@ public class InstructorAnalyticsService {
                     List<Progress> recentProgress = progressRepository
                             .findByStudentIdAndCourseId(student.getId(), courseId);
                     return recentProgress.stream()
-                            .anyMatch(p -> p.getLastAccessedAt().isAfter(oneWeekAgo));
+                            .anyMatch(p -> p.getLastWatchedAt() != null && p.getLastWatchedAt().isAfter(oneWeekAgo));
                 })
                 .count();
         
