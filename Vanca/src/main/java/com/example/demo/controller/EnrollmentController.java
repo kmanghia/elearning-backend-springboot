@@ -3,7 +3,6 @@ package com.example.demo.controller;
 import com.example.demo.dto.response.EnrollmentResponse;
 import com.example.demo.security.UserPrincipal;
 import com.example.demo.service.EnrollmentService;
-import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -14,10 +13,14 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/enrollments")
-@RequiredArgsConstructor
 public class EnrollmentController {
 
 	private final EnrollmentService enrollmentService;
+
+
+	public EnrollmentController(EnrollmentService enrollmentService) {
+		this.enrollmentService = enrollmentService;
+	}
 
 	@PostMapping("/courses/{courseId}")
 	@PreAuthorize("hasRole('STUDENT')")
